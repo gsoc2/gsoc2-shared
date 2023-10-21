@@ -17,7 +17,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/storage"
-	"github.com/gsoc2/gsoc2-shared/kin-openapi/openapi3"
+	"github.com/gsoc2/kin-openapi/openapi3"
 	//"github.com/satori/go.uuid"
 	"gopkg.in/yaml.v2"
 )

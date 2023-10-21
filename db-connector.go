@@ -29,7 +29,7 @@ import (
 	"github.com/bradfitz/slice"
 	uuid "github.com/satori/go.uuid"
 
-	//"github.com/gsoc2/gsoc2-shared/kin-openapi/openapi3"
+	//"github.com/gsoc2/kin-openapi/openapi3"
 	"github.com/patrickmn/go-cache"
 	"google.golang.org/api/iterator"
 
