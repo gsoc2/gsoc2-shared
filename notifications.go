@@ -1,4 +1,4 @@
-package shuffle
+package gsoc2
 
 import (
 	"bytes"
@@ -231,7 +231,7 @@ func sendToNotificationWorkflow(ctx context.Context, notification Notification, 
 	backendUrl := os.Getenv("BASE_URL")
 	if project.Environment == "cloud" {
 		// Doesn't work multi-region
-		backendUrl = "https://shuffler.io"
+		backendUrl = "https://soc2.khulnasoft.com.io"
 	}
 
 	// Callback to itself
@@ -239,8 +239,8 @@ func sendToNotificationWorkflow(ctx context.Context, notification Notification, 
 		backendUrl = "http://localhost:5001"
 	}
 
-	if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-		backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+		backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 	}
 
 	b, err := json.Marshal(notification)

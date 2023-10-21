@@ -1,4 +1,4 @@
-package shuffle
+package gsoc2
 
 import (
 	"bytes"
@@ -49,8 +49,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var project ShuffleStorage
-var baseDockerName = "frikky/shuffle"
+var project Gsoc2Storage
+var baseDockerName = "frikky/gsoc2"
 var SSOUrl = ""
 
 func RequestMiddleware(next http.Handler) http.Handler {
@@ -95,7 +95,7 @@ func GetUsecaseData() string {
 				"last": "cases",
 				"description": "Ensure tickets are forwarded to the correct destination. Alternatively add enrichment on it's way there.",
 				"video": "https://www.youtube.com/watch?v=FBISHA7V15c&t=197s&ab_channel=OpenSecure",
-				"blogpost": "https://medium.com/shuffle-automation/introducing-shuffle-an-open-source-soar-platform-part-1-58a529de7d12",
+				"blogpost": "https://medium.com/gsoc2-automation/introducing-gsoc2-an-open-source-soar-platform-part-1-58a529de7d12",
 				"reference_image": "/images/detectionframework.png",
                 "items": {}
             },
@@ -448,7 +448,7 @@ func GetUsecaseData() string {
 ]`)
 }
 
-var sandboxProject = "shuffle-sandbox-337810"
+var sandboxProject = "gsoc2-sandbox-337810"
 
 func GetContext(request *http.Request) context.Context {
 	return context.Background()
@@ -469,10 +469,10 @@ func HandleCors(resp http.ResponseWriter, request *http.Request) bool {
 		resp.Header().Set("Access-Control-Allow-Origin", origin[0])
 
 		// Location testing
-		//resp.Header().Set("Access-Control-Allow-Origin", "https://ca.shuffler.io")
-		//resp.Header().Set("Access-Control-Allow-Origin", "https://us.shuffler.io")
-		//resp.Header().Set("Access-Control-Allow-Origin", "https://eu.shuffler.io")
-		//resp.Header().Set("Access-Control-Allow-Origin", "https://in.shuffler.io")
+		//resp.Header().Set("Access-Control-Allow-Origin", "https://ca.soc2.khulnasoft.com.io")
+		//resp.Header().Set("Access-Control-Allow-Origin", "https://us.soc2.khulnasoft.com.io")
+		//resp.Header().Set("Access-Control-Allow-Origin", "https://eu.soc2.khulnasoft.com.io")
+		//resp.Header().Set("Access-Control-Allow-Origin", "https://in.soc2.khulnasoft.com.io")
 		//resp.Header().Set("Access-Control-Allow-Origin", "http://localhost:3002")
 	} else {
 		resp.Header().Set("Access-Control-Allow-Origin", "http://localhost:4201")
@@ -549,9 +549,9 @@ func HandleSet2fa(resp http.ResponseWriter, request *http.Request) {
 	user, err := HandleApiAuthentication(resp, request)
 
 	if project.Environment == "cloud" {
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting SET 2fa request to main site handler (shuffler.io)")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting SET 2fa request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 
 			DeleteCache(ctx, fmt.Sprintf("Organizations_%s", user.ActiveOrg.Id))
@@ -725,9 +725,9 @@ func HandleGet2fa(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	if project.Environment == "cloud" {
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting GET 2fa request to main site handler (shuffler.io)")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting GET 2fa request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -774,7 +774,7 @@ func HandleGet2fa(resp http.ResponseWriter, request *http.Request) {
 	// authentication link. Remember to replace SocketLoop with yours.
 	// for more details see
 	// https://github.com/google/google-authenticator/wiki/Key-Uri-Format
-	authLink := fmt.Sprintf("otpauth://totp/%s?secret=%s&issuer=Shuffle", user.Username, secret)
+	authLink := fmt.Sprintf("otpauth://totp/%s?secret=%s&issuer=Gsoc2", user.Username, secret)
 	png, err := qrcode.Encode(authLink, qrcode.Medium, 256)
 	if err != nil {
 		log.Printf("[ERROR] Failed PNG encoding: %s", err)
@@ -823,9 +823,9 @@ func HandleGetOrgs(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	if project.Environment == "cloud" {
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting GET ORGS request to main site handler (shuffler.io)")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting GET ORGS request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -897,14 +897,14 @@ func HandleGetOrg(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	// Checking if it's a special region. All user-specific requests should
-	// go through shuffler.io and not subdomains
+	// go through soc2.khulnasoft.com.io and not subdomains
 
 	// Commented out because of org distribution working it should
 	/*
 	if project.Environment == "cloud" {
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting GET ORG request to main site handler (shuffler.io)")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting GET ORG request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -1175,10 +1175,10 @@ func HandleLogout(resp http.ResponseWriter, request *http.Request) {
 	log.Printf("[AUDIT] Logging out user %s (%s)", userInfo.Username, userInfo.Id)
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting LOGOUT request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting LOGOUT request to main site handler (soc2.khulnasoft.com.io)")
 			DeleteCache(ctx, fmt.Sprintf("%s_workflows", userInfo.ActiveOrg.Id))
 			DeleteCache(ctx, fmt.Sprintf("%s_workflows", userInfo.Id))
 			DeleteCache(ctx, fmt.Sprintf("apps_%s", userInfo.Id))
@@ -1218,7 +1218,7 @@ func HandleLogout(resp http.ResponseWriter, request *http.Request) {
 			MaxAge:  -1,
 		}
 		if project.Environment == "cloud" {
-			newCookie.Domain = ".shuffler.io"
+			newCookie.Domain = ".soc2.khulnasoft.com.io"
 			newCookie.Secure = true
 			newCookie.HttpOnly = true
 		}
@@ -1237,7 +1237,7 @@ func HandleLogout(resp http.ResponseWriter, request *http.Request) {
 		}
 
 		if project.Environment == "cloud" {
-			newCookie.Domain = ".shuffler.io"
+			newCookie.Domain = ".soc2.khulnasoft.com.io"
 			newCookie.Secure = true
 			newCookie.HttpOnly = true
 		}
@@ -1988,10 +1988,10 @@ func HandleRerunExecutions(resp http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	if strings.ToLower(os.Getenv("SHUFFLE_DISABLE_RERUN_AND_ABORT")) == "true" {
-		log.Printf("[AUDIT] Rerunning is disabled by the SHUFFLE_DISABLE_RERUN_AND_ABORT argument. Stopping.")
+	if strings.ToLower(os.Getenv("GSOC2_DISABLE_RERUN_AND_ABORT")) == "true" {
+		log.Printf("[AUDIT] Rerunning is disabled by the GSOC2_DISABLE_RERUN_AND_ABORT argument. Stopping.")
 		resp.WriteHeader(409)
-		resp.Write([]byte(fmt.Sprintf(`{"success": false, "reason": "SHUFFLE_DISABLE_RERUN_AND_ABORT is active. Won't rerun executions."}`)))
+		resp.Write([]byte(fmt.Sprintf(`{"success": false, "reason": "GSOC2_DISABLE_RERUN_AND_ABORT is active. Won't rerun executions."}`)))
 		return
 	}
 
@@ -2094,10 +2094,10 @@ func HandleStopExecutions(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	// Fix here by allowing cleanup from UI anyway :)
-	if strings.ToLower(os.Getenv("SHUFFLE_DISABLE_RERUN_AND_ABORT")) == "true" {
-		log.Printf("[AUDIT] Rerunning is disabled by the SHUFFLE_DISABLE_RERUN_AND_ABORT argument. Stopping. (abort)")
+	if strings.ToLower(os.Getenv("GSOC2_DISABLE_RERUN_AND_ABORT")) == "true" {
+		log.Printf("[AUDIT] Rerunning is disabled by the GSOC2_DISABLE_RERUN_AND_ABORT argument. Stopping. (abort)")
 		resp.WriteHeader(409)
-		resp.Write([]byte(fmt.Sprintf(`{"success": false, "reason": "SHUFFLE_DISABLE_RERUN_AND_ABORT is active. Won't rerun executions (abort)"}`)))
+		resp.Write([]byte(fmt.Sprintf(`{"success": false, "reason": "GSOC2_DISABLE_RERUN_AND_ABORT is active. Won't rerun executions (abort)"}`)))
 		return
 	}
 
@@ -2246,7 +2246,7 @@ func RerunExecution(ctx context.Context, environment string, workflow Workflow) 
 
 	//backendUrl := os.Getenv("BASE_URL")
 	//if project.Environment == "cloud" {
-	//	backendUrl = "https://shuffler.io"
+	//	backendUrl = "https://soc2.khulnasoft.com.io"
 	//} else {
 	//	backendUrl = "http://127.0.0.1:5001"
 	//}
@@ -2328,13 +2328,13 @@ func RerunExecution(ctx context.Context, environment string, workflow Workflow) 
 			//	continue
 			//}
 
-			streamUrl := fmt.Sprintf("https://shuffler.io")
-			if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-				streamUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+			streamUrl := fmt.Sprintf("https://soc2.khulnasoft.com.io")
+			if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+				streamUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 			}
 
-			if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-				streamUrl = fmt.Sprintf("%s", os.Getenv("SHUFFLE_CLOUDRUN_URL"))
+			if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+				streamUrl = fmt.Sprintf("%s", os.Getenv("GSOC2_CLOUDRUN_URL"))
 			}
 
 			streamUrl = fmt.Sprintf("%s/api/v1/workflows/%s/executions/%s/rerun", streamUrl, execution.Workflow.ID, execution.ExecutionId)
@@ -2394,14 +2394,14 @@ func CleanupExecutions(ctx context.Context, environment string, workflow Workflo
 	backendUrl := os.Getenv("BASE_URL")
 	// Redundant, but working ;)
 	if project.Environment == "cloud" {
-		backendUrl = "https://shuffler.io"
+		backendUrl = "https://soc2.khulnasoft.com.io"
 
-		if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-			backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+		if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+			backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 		}
 
-		if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-			backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+		if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+			backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 		}
 
 	} else {
@@ -2447,7 +2447,7 @@ func CleanupExecutions(ctx context.Context, environment string, workflow Workflo
 			continue
 		}
 
-		streamUrl := fmt.Sprintf("%s/api/v1/workflows/%s/executions/%s/abort?reason=%s", backendUrl, execution.Workflow.ID, execution.ExecutionId, url.QueryEscape(`{"success": False, "reason": "Shuffle's automated cleanup bot stopped this execution as it didn't finish within 30 minutes."}`))
+		streamUrl := fmt.Sprintf("%s/api/v1/workflows/%s/executions/%s/abort?reason=%s", backendUrl, execution.Workflow.ID, execution.ExecutionId, url.QueryEscape(`{"success": False, "reason": "Gsoc2's automated cleanup bot stopped this execution as it didn't finish within 30 minutes."}`))
 		//log.Printf("Url: %s", streamUrl)
 		req, err := http.NewRequest(
 			"GET",
@@ -2737,7 +2737,7 @@ func HandleApiAuthentication(resp http.ResponseWriter, request *http.Request) (U
 		}
 
 		if project.Environment == "cloud" {
-			newCookie.Domain = ".shuffler.io"
+			newCookie.Domain = ".soc2.khulnasoft.com.io"
 			newCookie.Secure = true
 			newCookie.HttpOnly = true
 		}
@@ -2790,7 +2790,7 @@ func HandleApiAuthentication(resp http.ResponseWriter, request *http.Request) (U
 			}
 
 			if project.Environment == "cloud" {
-				newCookie.Domain = ".shuffler.io"
+				newCookie.Domain = ".soc2.khulnasoft.com.io"
 				newCookie.Secure = true
 				newCookie.HttpOnly = true
 			}
@@ -2916,8 +2916,8 @@ func GetResult(ctx context.Context, workflowExecution WorkflowExecution, id stri
 				break
 			}
 
-			if actionResult.Action.AppName == "shuffle-subflow" && project.Environment == "cloud" {
-				//if os.Getenv("SHUFFLE_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
+			if actionResult.Action.AppName == "gsoc2-subflow" && project.Environment == "cloud" {
+				//if os.Getenv("GSOC2_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
 				//log.Printf("[INFO] Skipping due to cache requirement for subflow")
 				break
 			}
@@ -3036,7 +3036,7 @@ func GetWorkflowExecutions(resp http.ResponseWriter, request *http.Request) {
 	if user.Id != workflow.Owner || len(user.Id) == 0 {
 		if workflow.OrgId == user.ActiveOrg.Id {
 			log.Printf("[AUDIT] User %s is accessing workflow '%s' (%s) executions as %s (get executions)", user.Username, workflow.Name, workflow.ID, user.Role)
-		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@shuffler.io") {
+		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@soc2.khulnasoft.com.io") {
 			log.Printf("[AUDIT] Letting verified support admin %s access workflow execs for %s", user.Username, workflow.ID)
 		} else {
 			log.Printf("[AUDIT] Wrong user (%s) for workflow %s (get workflow execs)", user.Username, workflow.ID)
@@ -3184,7 +3184,7 @@ func GetWorkflowExecutionsV2(resp http.ResponseWriter, request *http.Request) {
 	if user.Id != workflow.Owner || len(user.Id) == 0 {
 		if workflow.OrgId == user.ActiveOrg.Id {
 			log.Printf("[AUDIT] User %s is accessing workflow '%s' (%s) executions as %s (get executions)", user.Username, workflow.Name, workflow.ID, user.Role)
-		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@shuffler.io") {
+		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@soc2.khulnasoft.com.io") {
 			log.Printf("[AUDIT] Letting verified support admin %s access workflow execs for %s", user.Username, workflow.ID)
 		} else {
 			log.Printf("[AUDIT] Wrong user (%s) for workflow %s (get workflow execs)", user.Username, workflow.ID)
@@ -3571,11 +3571,11 @@ func HandleUpdateUser(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
+		// go through soc2.khulnasoft.com.io and not subdomains
 
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting Update User request to main site handler (shuffler.io)")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting Update User request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -4129,7 +4129,7 @@ func SetNewWorkflow(resp http.ResponseWriter, request *http.Request) {
 		envName := "cloud"
 		if project.Environment != "cloud" {
 			workflowapps, err = GetAllWorkflowApps(ctx, 1000, 0)
-			envName = "Shuffle"
+			envName = "Gsoc2"
 		}
 
 		//log.Printf("[DEBUG] Got %d apps. Err: %s", len(workflowapps), err)
@@ -4146,7 +4146,7 @@ func SetNewWorkflow(resp http.ResponseWriter, request *http.Request) {
 
 			for _, item := range workflowapps {
 				//log.Printf("NAME: %s", item.Name)
-				if (item.Name == "Shuffle Tools" || item.Name == "Shuffle-Tools") && item.AppVersion == "1.2.0" {
+				if (item.Name == "Gsoc2 Tools" || item.Name == "Gsoc2-Tools") && item.AppVersion == "1.2.0" {
 					//nodeId := "40447f30-fa44-4a4f-a133-4ee710368737"
 					nodeId := uuid.NewV4().String()
 					workflow.Start = nodeId
@@ -4496,7 +4496,7 @@ func SaveWorkflow(resp http.ResponseWriter, request *http.Request) {
 					customResponse := ""
 					for paramIndex, param := range trigger.Parameters {
 						if param.Name == "url" {
-							trigger.Parameters[paramIndex].Value = fmt.Sprintf("https://shuffler.io/api/v1/hooks/webhook_%s", newId)
+							trigger.Parameters[paramIndex].Value = fmt.Sprintf("https://soc2.khulnasoft.com.io/api/v1/hooks/webhook_%s", newId)
 						}
 
 						if param.Name == "auth_headers" {
@@ -4520,7 +4520,7 @@ func SaveWorkflow(resp http.ResponseWriter, request *http.Request) {
 								Info: Info{
 									Name:        trigger.Name,
 									Description: trigger.Description,
-									Url:         fmt.Sprintf("https://shuffler.io/api/v1/hooks/webhook_%s", newId),
+									Url:         fmt.Sprintf("https://soc2.khulnasoft.com.io/api/v1/hooks/webhook_%s", newId),
 								},
 								Type:   "webhook",
 								Owner:  user.Username,
@@ -4750,7 +4750,7 @@ func SaveWorkflow(resp http.ResponseWriter, request *http.Request) {
 		if project.Environment == "cloud" {
 			defaultEnv = "Cloud"
 		} else {
-			defaultEnv = "Shuffle"
+			defaultEnv = "Gsoc2"
 		}
 	}
 
@@ -5159,13 +5159,13 @@ func SaveWorkflow(resp http.ResponseWriter, request *http.Request) {
 			} else {
 				if !strings.Contains(trigger.Parameters[0].Value, trigger.ID) {
 					log.Printf("[INFO] Fixing webhook URL for %s", trigger.ID)
-					baseUrl := "https://shuffler.io"
-					if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-						baseUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+					baseUrl := "https://soc2.khulnasoft.com.io"
+					if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+						baseUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 					}
 
-					if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-						baseUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+					if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+						baseUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 					}
 
 					if project.Environment != "cloud" {
@@ -5237,7 +5237,7 @@ func SaveWorkflow(resp http.ResponseWriter, request *http.Request) {
 				log.Printf("[DEBUG] Should send SMS to %s during execution.", sms)
 			}
 
-			// Removed all checks as this is handled in the shuffle-subflow app
+			// Removed all checks as this is handled in the gsoc2-subflow app
 			if strings.Contains(triggerType, "subflow") {
 				//if strings.Contains(subflow, "/") {
 				//	subflowSplit := strings.Split(subflow, "/")
@@ -5685,7 +5685,7 @@ func SaveWorkflow(resp http.ResponseWriter, request *http.Request) {
 
 
 								// Some internal reserves
-								if ((strings.ToLower(action.Name) == "send_sms_shuffle" || strings.ToLower(action.Name) == "send_email_shuffle") && param.Name == "apikey") || (action.Name == "repeat_back_to_me") {
+								if ((strings.ToLower(action.Name) == "send_sms_gsoc2" || strings.ToLower(action.Name) == "send_email_gsoc2") && param.Name == "apikey") || (action.Name == "repeat_back_to_me") {
 								} else {
 									thisError := fmt.Sprintf("Action %s is missing required parameter %s", action.Label, param.Name)
 									if actionParam.Configuration && len(action.AuthenticationId) == 0 {
@@ -6128,10 +6128,10 @@ func HandleApiGeneration(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting API GEN request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting API GEN request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -6237,10 +6237,10 @@ func HandleSettings(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting Handle Settings request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting Handle Settings request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -6282,10 +6282,10 @@ func HandleGetUsers(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting Get Users request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting Get Users request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -6413,10 +6413,10 @@ func HandlePasswordChange(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting Password Change request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting Password Change request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -6792,7 +6792,7 @@ func GetSpecificWorkflow(resp http.ResponseWriter, request *http.Request) {
 			log.Printf("[AUDIT] Letting user %s access workflow %s because it's public", user.Username, workflow.ID)
 
 			// Only for Read-Only. No executions or impersonations.
-		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@shuffler.io") {
+		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@soc2.khulnasoft.com.io") {
 			log.Printf("[AUDIT] Letting verified support admin %s access workflow %s", user.Username, workflow.ID)
 		} else {
 			log.Printf("[AUDIT] Wrong user (%s) for workflow %s (get workflow). Verified: %t, Active: %t, SupportAccess: %t, Username: %s", user.Username, workflow.ID, user.Verified, user.Active, user.SupportAccess, user.Username)
@@ -6820,7 +6820,7 @@ func GetSpecificWorkflow(resp http.ResponseWriter, request *http.Request) {
 		workflow.Actions[key].ReferenceUrl = ""
 
 		// Never helpful when this is red
-		if workflow.Actions[key].AppName == "Shuffle Tools" {
+		if workflow.Actions[key].AppName == "Gsoc2 Tools" {
 			workflow.Actions[key].IsValid = true
 		}
 
@@ -6863,10 +6863,10 @@ func DeleteUser(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting User request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting User request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -7021,10 +7021,10 @@ func UpdateWorkflowAppConfig(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting LOGIN request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting LOGIN request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -7557,12 +7557,12 @@ func HandleChangeUserOrg(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
+		// go through soc2.khulnasoft.com.io and not subdomains
 
 		// Clean up the users' cache for different parts
 
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
 
 			DeleteCache(ctx, fmt.Sprintf("%s_workflows", user.Id))
 			DeleteCache(ctx, fmt.Sprintf("apps_%s", user.Id))
@@ -7571,7 +7571,7 @@ func HandleChangeUserOrg(resp http.ResponseWriter, request *http.Request) {
 			DeleteCache(ctx, fmt.Sprintf(user.ApiKey))
 			DeleteCache(ctx, fmt.Sprintf("session_%s", user.Session))
 
-			log.Printf("[DEBUG] Redirecting ORGCHANGE request to main site handler (shuffler.io)")
+			log.Printf("[DEBUG] Redirecting ORGCHANGE request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 
 			DeleteCache(ctx, fmt.Sprintf("%s_workflows", user.Id))
@@ -7646,7 +7646,7 @@ func HandleChangeUserOrg(resp http.ResponseWriter, request *http.Request) {
 	// This could in theory be built out open source as well
 	regionUrl := ""
 	if project.Environment == "cloud" {
-		regionUrl = "https://shuffler.io"
+		regionUrl = "https://soc2.khulnasoft.com.io"
 	}
 
 	if project.Environment == "cloud" && len(org.RegionUrl) > 0 && !strings.Contains(org.RegionUrl, "\"") {
@@ -7695,7 +7695,7 @@ func HandleChangeUserOrg(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	if project.Environment == "cloud" {
-		newCookie.Domain = ".shuffler.io"
+		newCookie.Domain = ".soc2.khulnasoft.com.io"
 		newCookie.Secure = true
 		newCookie.HttpOnly = true
 	}
@@ -7764,11 +7764,11 @@ func HandleCreateSubOrg(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	// Checking if it's a special region. All user-specific requests should
-	// go through shuffler.io and not subdomains
+	// go through soc2.khulnasoft.com.io and not subdomains
 	if project.Environment == "cloud" {
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting Create Suborg request to main site handler (shuffler.io)")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting Create Suborg request to main site handler (soc2.khulnasoft.com.io)")
 
 			RedirectUserRequest(resp, request)
 			return
@@ -7954,11 +7954,11 @@ func HandleEditOrg(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	// Checking if it's a special region. All user-specific requests should
-	// go through shuffler.io and not subdomains
+	// go through soc2.khulnasoft.com.io and not subdomains
 	if project.Environment == "cloud" {
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting Edit Org request to main site handler (shuffler.io)")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting Edit Org request to main site handler (soc2.khulnasoft.com.io)")
 
 			RedirectUserRequest(resp, request)
 			return
@@ -8494,7 +8494,7 @@ func AbortExecution(resp http.ResponseWriter, request *http.Request) {
 	extra := 0
 	for _, trigger := range workflowExecution.Workflow.Triggers {
 		//log.Printf("Appname trigger (0): %s", trigger.AppName)
-		if trigger.AppName == "User Input" || trigger.AppName == "Shuffle Workflow" {
+		if trigger.AppName == "User Input" || trigger.AppName == "Gsoc2 Workflow" {
 			extra += 1
 		}
 	}
@@ -8740,20 +8740,20 @@ func HandleNewHook(resp http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	// Let remote endpoint handle access checks (shuffler.io)
-	baseUrl := "https://shuffler.io"
-	if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-		baseUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+	// Let remote endpoint handle access checks (soc2.khulnasoft.com.io)
+	baseUrl := "https://soc2.khulnasoft.com.io"
+	if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+		baseUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 	}
 
-	if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-		baseUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+		baseUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 	}
 
 	currentUrl := fmt.Sprintf("%s/api/v1/hooks/webhook_%s", baseUrl, newId)
 	startNode := requestdata.Start
 	if requestdata.Environment == "cloud" && project.Environment != "cloud" {
-		// https://shuffler.io/v1/hooks/webhook_80184973-3e82-4852-842e-0290f7f34d7c
+		// https://soc2.khulnasoft.com.io/v1/hooks/webhook_80184973-3e82-4852-842e-0290f7f34d7c
 		log.Printf("[INFO] Should START a cloud webhook for url %s for startnode %s", currentUrl, startNode)
 		org, err := GetOrg(ctx, user.ActiveOrg.Id)
 		if err != nil {
@@ -8910,7 +8910,7 @@ func HandleDeleteHook(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	if hook.Environment == "cloud" && project.Environment != "cloud" {
-		log.Printf("[INFO] Should STOP cloud webhook https://shuffler.io/api/v1/hooks/webhook_%s", hook.Id)
+		log.Printf("[INFO] Should STOP cloud webhook https://soc2.khulnasoft.com.io/api/v1/hooks/webhook_%s", hook.Id)
 		org, err := GetOrg(ctx, user.ActiveOrg.Id)
 		if err != nil {
 			log.Printf("Failed finding org %s: %s", org.Id, err)
@@ -8935,7 +8935,7 @@ func HandleDeleteHook(resp http.ResponseWriter, request *http.Request) {
 			resp.Write([]byte(fmt.Sprintf(`{"success": false, "reason": "%s"}`, err)))
 			return
 		}
-		// https://shuffler.io/v1/hooks/webhook_80184973-3e82-4852-842e-0290f7f34d7c
+		// https://soc2.khulnasoft.com.io/v1/hooks/webhook_80184973-3e82-4852-842e-0290f7f34d7c
 	}
 
 	err = DeleteKey(ctx, "hooks", fileId)
@@ -8966,10 +8966,10 @@ func GetWorkflowAppConfig(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting App request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting App request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -9092,7 +9092,7 @@ func GetWorkflowAppConfig(resp http.ResponseWriter, request *http.Request) {
 	if user.Id == app.Owner || (user.Role == "admin" && user.ActiveOrg.Id == app.ReferenceOrg) {
 		log.Printf("[DEBUG] Got app %s with user %s (%s) in org %s", app.ID, user.Username, user.Id, user.ActiveOrg.Id)
 	} else {
-		if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@shuffler.io") {
+		if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@soc2.khulnasoft.com.io") {
 			log.Printf("[AUDIT] Support & Admin user %s (%s) got access to app %s (cloud only)", user.Username, user.Id, app.ID)
 		} else if user.Role == "admin" && app.Owner == "" {
 			log.Printf("[AUDIT] Any admin can GET %s (%s), since it doesn't have an owner (GET).", app.Name, app.ID)
@@ -9191,10 +9191,10 @@ func GetOpenIdUrl(request *http.Request, org Org) string {
 	//redirectUrl := url.QueryEscape("http://localhost:5001/api/v1/login_openid")
 	redirectUrl := url.QueryEscape(fmt.Sprintf("http://%s/api/v1/login_openid", request.Host))
 	if project.Environment == "cloud" {
-		redirectUrl = url.QueryEscape(fmt.Sprintf("https://shuffler.io/api/v1/login_openid"))
+		redirectUrl = url.QueryEscape(fmt.Sprintf("https://soc2.khulnasoft.com.io/api/v1/login_openid"))
 	}
 
-	if project.Environment != "cloud" && strings.Contains(request.Host, "shuffle-backend") && !strings.Contains(os.Getenv("BASE_URL"), "shuffle-backend") {
+	if project.Environment != "cloud" && strings.Contains(request.Host, "gsoc2-backend") && !strings.Contains(os.Getenv("BASE_URL"), "gsoc2-backend") {
 		redirectUrl = url.QueryEscape(fmt.Sprintf("%s/api/v1/login_openid", os.Getenv("BASE_URL")))
 	}
 
@@ -9236,10 +9236,10 @@ func HandleLogin(resp http.ResponseWriter, request *http.Request) {
 
 	if project.Environment == "cloud" {
 		// Checking if it's a special region. All user-specific requests should
-		// go through shuffler.io and not subdomains
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting LOGIN request to main site handler (shuffler.io)")
+		// go through soc2.khulnasoft.com.io and not subdomains
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting LOGIN request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}
@@ -9316,9 +9316,9 @@ func HandleLogin(resp http.ResponseWriter, request *http.Request) {
 	org := Org{}
 	updateUser := false
 	if project.Environment == "cloud" {
-		if strings.HasSuffix(strings.ToLower(userdata.Username), "@shuffler.io") {
+		if strings.HasSuffix(strings.ToLower(userdata.Username), "@soc2.khulnasoft.com.io") {
 			if !userdata.Active {
-				log.Printf("[INFO] User %s with @shuffler suffix is not active.", userdata.Username)
+				log.Printf("[INFO] User %s with @soc2.khulnasoft.com suffix is not active.", userdata.Username)
 				resp.WriteHeader(401)
 				resp.Write([]byte(fmt.Sprintf(`{"success": true, "reason": "error: You need to activate your account before logging in"}`)))
 				return
@@ -9540,7 +9540,7 @@ func HandleLogin(resp http.ResponseWriter, request *http.Request) {
 		}
 
 		if project.Environment == "cloud" {
-			newCookie.Domain = ".shuffler.io"
+			newCookie.Domain = ".soc2.khulnasoft.com.io"
 			newCookie.Secure = true
 			newCookie.HttpOnly = true
 		}
@@ -9599,7 +9599,7 @@ func HandleLogin(resp http.ResponseWriter, request *http.Request) {
 		}
 
 		if project.Environment == "cloud" {
-			newCookie.Domain = ".shuffler.io"
+			newCookie.Domain = ".soc2.khulnasoft.com.io"
 			newCookie.Secure = true
 			newCookie.HttpOnly = true
 		}
@@ -9694,17 +9694,17 @@ func checkUsername(Username string) error {
 // without remoting problems and the like.
 func updateExecutionParent(ctx context.Context, executionParent, returnValue, parentAuth, parentNode, subflowExecutionId string) error {
 
-	// Was an error here. Now defined to run with http://shuffle-backend:5001 by default
+	// Was an error here. Now defined to run with http://gsoc2-backend:5001 by default
 	backendUrl := os.Getenv("BASE_URL")
 	if project.Environment == "cloud" {
-		backendUrl = "https://shuffler.io"
+		backendUrl = "https://soc2.khulnasoft.com.io"
 
-		if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-			backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+		if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+			backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 		}
 
-		if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-			backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+		if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+			backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 		}
 
 		//backendUrl = "http://localhost:5002"
@@ -9712,8 +9712,8 @@ func updateExecutionParent(ctx context.Context, executionParent, returnValue, pa
 
 	// FIXME: This MAY fail at scale due to not being able to get the right worker
 	// Maybe we need to pass the worker's real id, and not its VIP?
-	if os.Getenv("SHUFFLE_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
-		backendUrl = "http://shuffle-workers:33333"
+	if os.Getenv("GSOC2_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
+		backendUrl = "http://gsoc2-workers:33333"
 
 		hostenv := os.Getenv("WORKER_HOSTNAME")
 		if len(hostenv) > 0 {
@@ -9723,7 +9723,7 @@ func updateExecutionParent(ctx context.Context, executionParent, returnValue, pa
 		// From worker:
 		//parsedRequest.BaseUrl = fmt.Sprintf("http://%s:%d", hostname, baseport)
 
-		log.Printf("[DEBUG][%s] Sending request for shuffle-subflow result to %s. Should this be a specific worker? Specific worker is better if cache is NOT memcached", subflowExecutionId, backendUrl)
+		log.Printf("[DEBUG][%s] Sending request for gsoc2-subflow result to %s. Should this be a specific worker? Specific worker is better if cache is NOT memcached", subflowExecutionId, backendUrl)
 	}
 
 	// Waiting due to speed problems in certain circumstances
@@ -10020,7 +10020,7 @@ func updateExecutionParent(ctx context.Context, executionParent, returnValue, pa
 					Label:       selectedTrigger.Label,
 					ID:          parentNode,
 					Name:        "run_subflow",
-					AppName:     "shuffle-subflow",
+					AppName:     "gsoc2-subflow",
 					AppVersion:  "1.0.0",
 					Environment: selectedTrigger.Environment,
 				}
@@ -10137,21 +10137,21 @@ func ResendActionResult(actionData []byte, retries int64) {
 
 	backendUrl := os.Getenv("BASE_URL")
 	if project.Environment == "cloud" {
-		backendUrl = "https://shuffler.io"
+		backendUrl = "https://soc2.khulnasoft.com.io"
 
-		if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-			backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+		if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+			backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 		}
 
-		if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-			backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+		if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+			backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 		}
 	}
 
-	if os.Getenv("SHUFFLE_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
-		backendUrl = "http://shuffle-workers:33333"
+	if os.Getenv("GSOC2_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
+		backendUrl = "http://gsoc2-workers:33333"
 
-		// Should connect to self, not shuffle-workers
+		// Should connect to self, not gsoc2-workers
 		hostenv := os.Getenv("WORKER_HOSTNAME")
 		if len(hostenv) > 0 {
 			backendUrl = fmt.Sprintf("http://%s:33333", hostenv)
@@ -10388,7 +10388,7 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 	//log.Printf("\n\nACTIONRES: %s\n\nRES: %s\n", actionResult, actionResult.Result)
 
 	setCache := true
-	if actionResult.Action.AppName == "shuffle-subflow" {
+	if actionResult.Action.AppName == "gsoc2-subflow" {
 		//log.Printf("\n\n\n\n\n\n\n\n\n\n\n\n\nSUBFLOW RESULT!!!")
 
 		// Verifying if the userinput should be sent properly or not
@@ -10604,7 +10604,7 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 	}
 
 	// Used for testing subflow shit
-	//if strings.Contains(actionResult.Action.Label, "Shuffle Workflow_30") {
+	//if strings.Contains(actionResult.Action.Label, "Gsoc2 Workflow_30") {
 	//	log.Printf("RESULT FOR %s: %s", actionResult.Action.Label, actionResult.Result)
 	//	if !strings.Contains(actionResult.Result, "\"result\"") {
 	//		log.Printf("NO RESULT - RETURNING!")
@@ -10616,7 +10616,7 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 	// Deprecated! Now runs updateExecutionParent() instead
 	// Update: handling this farther down the function
 	//log.Printf("[DEBUG] STATUS OF %s: %s", actionResult.Action.AppName, actionResult.Status)
-	if actionResult.Status == "SUCCESS" && actionResult.Action.AppName == "shuffle-subflow" {
+	if actionResult.Status == "SUCCESS" && actionResult.Action.AppName == "gsoc2-subflow" {
 		dbSave = true
 	}
 
@@ -10685,7 +10685,7 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 						//log.Printf("%s : %s", trigger.ID, nodeId)
 						if trigger.ID == nodeId {
 							isTrigger = true
-							name := "shuffle-subflow"
+							name := "gsoc2-subflow"
 							curAction = Action{
 								AppName:    name,
 								AppVersion: trigger.AppVersion,
@@ -10723,7 +10723,7 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 							parentTrigger := false
 							for _, trigger := range workflowExecution.Workflow.Triggers {
 								if trigger.ID == branch.SourceID {
-									if trigger.AppName != "User Input" && trigger.AppName != "Shuffle Workflow" {
+									if trigger.AppName != "User Input" && trigger.AppName != "Gsoc2 Workflow" {
 										parentTrigger = true
 									}
 								}
@@ -10838,7 +10838,7 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 
 			if len(foundAction.ID) == 0 {
 				for _, trigger := range workflowExecution.Workflow.Triggers {
-					//if trigger.AppName == "User Input" || trigger.AppName == "Shuffle Workflow" {
+					//if trigger.AppName == "User Input" || trigger.AppName == "Gsoc2 Workflow" {
 					if trigger.ID == branch.DestinationID {
 						foundAction = Action{
 							ID:      trigger.ID,
@@ -10847,8 +10847,8 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 							Label:   trigger.Label,
 						}
 
-						if trigger.AppName == "Shuffle Workflow" {
-							foundAction.AppName = "shuffle-subflow"
+						if trigger.AppName == "Gsoc2 Workflow" {
+							foundAction.AppName = "gsoc2-subflow"
 						}
 
 						break
@@ -10914,21 +10914,21 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 
 					streamUrl := fmt.Sprintf("http://localhost:5001/api/v1/streams")
 					if project.Environment == "cloud" {
-						streamUrl = fmt.Sprintf("https://shuffler.io/api/v1/streams")
+						streamUrl = fmt.Sprintf("https://soc2.khulnasoft.com.io/api/v1/streams")
 
-						if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-							streamUrl = fmt.Sprintf("https://%s.%s.r.appspot.com/api/v1/streams", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+						if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+							streamUrl = fmt.Sprintf("https://%s.%s.r.appspot.com/api/v1/streams", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 						}
 
-						if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-							streamUrl = fmt.Sprintf("%s/api/v1/streams", os.Getenv("SHUFFLE_CLOUDRUN_URL"))
+						if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+							streamUrl = fmt.Sprintf("%s/api/v1/streams", os.Getenv("GSOC2_CLOUDRUN_URL"))
 						}
 					} else {
 						if len(os.Getenv("WORKER_HOSTNAME")) > 0 {
 							streamUrl = fmt.Sprintf("http://%s:33333/api/v1/streams", os.Getenv("WORKER_HOSTNAME"))
 						}
 
-						if os.Getenv("SHUFFLE_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
+						if os.Getenv("GSOC2_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
 
 							streamUrl = fmt.Sprintf("http://localhost:33333/api/v1/streams")
 
@@ -11113,7 +11113,7 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 	for _, trigger := range workflowExecution.Workflow.Triggers {
 		if trigger.Name == "User Input" && trigger.AppName == "User Input" {
 			extraInputs += 1
-		} else if trigger.Name == "Shuffle Workflow" && trigger.AppName == "Shuffle Workflow" {
+		} else if trigger.Name == "Gsoc2 Workflow" && trigger.AppName == "Gsoc2 Workflow" {
 			extraInputs += 1
 		}
 	}
@@ -11236,7 +11236,7 @@ func ParsedExecutionResult(ctx context.Context, workflowExecution WorkflowExecut
 	}
 
 	// Had to move this to run AFTER "updateExecutionParent()", as it's controlling whether a subflow should be updated or not
-	if actionResult.Status == "SUCCESS" && actionResult.Action.AppName == "shuffle-subflow" && !updateParentRan {
+	if actionResult.Status == "SUCCESS" && actionResult.Action.AppName == "gsoc2-subflow" && !updateParentRan {
 		runCheck := false
 		for _, param := range actionResult.Action.Parameters {
 			if param.Name == "check_result" {
@@ -11413,19 +11413,19 @@ func compressExecution(ctx context.Context, workflowExecution WorkflowExecution,
 				//log.Printf("[WARNING] Result length is too long (%d) when running %s! Need to reduce result size. Attempting auto-compression by saving data to disk.", len(tmpJson), saveLocationInfo)
 				actionId := "execution_argument"
 
-				//gs://shuffler.appspot.com/extra_specs/0373ed696a3a2cba0a2b6838068f2b80
+				//gs://soc2.khulnasoft.com.appspot.com/extra_specs/0373ed696a3a2cba0a2b6838068f2b80
 				//log.Printf("[WARNING] Couldn't find  for %s. Should check filepath gs://%s/%s (size too big)", innerApp.ID, internalBucket, fullParsedPath)
 
 				// Result        string `json:"result" datastore:"result,noindex"`
 				// Arbitrary reduction size
 				maxSize := 50000
-				bucketName := fmt.Sprintf("%s.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"))
+				bucketName := fmt.Sprintf("%s.appspot.com", os.Getenv("GSOC2_GCEPROJECT"))
 
 				if len(workflowExecution.ExecutionArgument) > maxSize {
 					itemSize := len(workflowExecution.ExecutionArgument)
 					baseResult := fmt.Sprintf(`{
 								"success": false,
-								"reason": "Result too large to handle (https://github.com/frikky/shuffle/issues/171).",
+								"reason": "Result too large to handle (https://github.com/frikky/gsoc2/issues/171).",
 								"size": %d,
 								"extra": "",
 								"id": "%s_%s"
@@ -11448,7 +11448,7 @@ func compressExecution(ctx context.Context, workflowExecution WorkflowExecution,
 						} else {
 							workflowExecution.ExecutionArgument = fmt.Sprintf(`{
 								"success": false,
-								"reason": "Result too large to handle (https://github.com/frikky/shuffle/issues/171).",
+								"reason": "Result too large to handle (https://github.com/frikky/gsoc2/issues/171).",
 								"size": %d,
 								"extra": "replace",
 								"id": "%s_%s"
@@ -11458,14 +11458,14 @@ func compressExecution(ctx context.Context, workflowExecution WorkflowExecution,
 				}
 
 				newResults := []ActionResult{}
-				//shuffle-large-executions
+				//gsoc2-large-executions
 				for _, item := range workflowExecution.Results {
 					if len(item.Result) > maxSize {
 
 						itemSize := len(item.Result)
 						baseResult := fmt.Sprintf(`{
 								"success": false,
-								"reason": "Result too large to handle (https://github.com/frikky/shuffle/issues/171).",
+								"reason": "Result too large to handle (https://github.com/frikky/gsoc2/issues/171).",
 								"size": %d,
 								"extra": "",
 								"id": "%s_%s"
@@ -11501,7 +11501,7 @@ func compressExecution(ctx context.Context, workflowExecution WorkflowExecution,
 
 						item.Result = fmt.Sprintf(`{
 								"success": false,
-								"reason": "Result too large to handle (https://github.com/frikky/shuffle/issues/171).",
+								"reason": "Result too large to handle (https://github.com/frikky/gsoc2/issues/171).",
 								"size": %d,
 								"extra": "replace",
 								"id": "%s_%s"
@@ -11916,7 +11916,7 @@ func handleJSONObject(object interface{}, key, totalObject string) string {
 }
 
 func FixBadJsonBody(parsedBody []byte) []byte {
-	if os.Getenv("SHUFFLE_JSON_PARSER") != "parse" {
+	if os.Getenv("GSOC2_JSON_PARSER") != "parse" {
 		return parsedBody
 	}
 	// NOT handling data that starts as a loop for now: [] instead of {} as outer wrapper.
@@ -12268,7 +12268,7 @@ func GetReplacementNodes(ctx context.Context, execution WorkflowExecution, trigg
 		changed := false
 		for _, nodeId := range childNodes {
 			for triggerIndex, trigger := range workflow.Triggers {
-				if trigger.AppName == "Shuffle Workflow" {
+				if trigger.AppName == "Gsoc2 Workflow" {
 					if nodeId == trigger.ID {
 						replaceActions := false
 						workflowAction := ""
@@ -12353,9 +12353,9 @@ func GetReplacementNodes(ctx context.Context, execution WorkflowExecution, trigg
 // FIXME: Investigate better ways of handling EVERYTHING related to encryption
 // E.g. rolling keys and such
 func create32Hash(key string) ([]byte, error) {
-	encryptionModifier := os.Getenv("SHUFFLE_ENCRYPTION_MODIFIER")
+	encryptionModifier := os.Getenv("GSOC2_ENCRYPTION_MODIFIER")
 	if len(encryptionModifier) == 0 {
-		return []byte{}, errors.New(fmt.Sprintf("No encryption modifier set. Define SHUFFLE_ENCRYPTION_MODIFIER and NEVER change it to start encrypting auth."))
+		return []byte{}, errors.New(fmt.Sprintf("No encryption modifier set. Define GSOC2_ENCRYPTION_MODIFIER and NEVER change it to start encrypting auth."))
 	}
 
 	key += encryptionModifier
@@ -13434,8 +13434,8 @@ func GetDocs(resp http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	owner := "shuffle"
-	repo := "shuffle-docs"
+	owner := "gsoc2"
+	repo := "gsoc2-docs"
 	path := "docs"
 	docPath := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/master/%s/%s.md", owner, repo, path, location[4])
 
@@ -13447,8 +13447,8 @@ func GetDocs(resp http.ResponseWriter, request *http.Request) {
 	if downloadOk {
 		if downloadLocation[0] == "openapi" {
 			newname = strings.ReplaceAll(strings.ToLower(location[4]), `%20`, "_")
-			docPath = fmt.Sprintf("https://raw.githubusercontent.com/Shuffle/openapi-apps/master/docs/%s.md", newname)
-			realPath = fmt.Sprintf("https://github.com/Shuffle/openapi-apps/blob/master/docs/%s.md", newname)
+			docPath = fmt.Sprintf("https://raw.githubusercontent.com/Gsoc2/openapi-apps/master/docs/%s.md", newname)
+			realPath = fmt.Sprintf("https://github.com/Gsoc2/openapi-apps/blob/master/docs/%s.md", newname)
 
 		} else if downloadLocation[0] == "python" && versionOk {
 			// Apparently this uses dashes for no good reason?
@@ -13459,14 +13459,14 @@ func GetDocs(resp http.ResponseWriter, request *http.Request) {
 			newname = strings.ToLower(newname)
 
 			if version[0] == "1.0.0" {
-				docPath = fmt.Sprintf("https://raw.githubusercontent.com/Shuffle/python-apps/master/%s/1.0.0/README.md", newname)
-				realPath = fmt.Sprintf("https://github.com/Shuffle/python-apps/blob/master/%s/1.0.0/README.md", newname)
+				docPath = fmt.Sprintf("https://raw.githubusercontent.com/Gsoc2/python-apps/master/%s/1.0.0/README.md", newname)
+				realPath = fmt.Sprintf("https://github.com/Gsoc2/python-apps/blob/master/%s/1.0.0/README.md", newname)
 
 				log.Printf("[INFO] Should download python app for version %s: %s", version[0], docPath)
 
 			} else {
-				realPath = fmt.Sprintf("https://github.com/Shuffle/python-apps/blob/master/%s/README.md", newname)
-				docPath = fmt.Sprintf("https://raw.githubusercontent.com/Shuffle/python-apps/master/%s/README.md", newname)
+				realPath = fmt.Sprintf("https://github.com/Gsoc2/python-apps/blob/master/%s/README.md", newname)
+				docPath = fmt.Sprintf("https://raw.githubusercontent.com/Gsoc2/python-apps/master/%s/README.md", newname)
 			}
 
 		}
@@ -13603,8 +13603,8 @@ func GetDocList(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	client := github.NewClient(nil)
-	owner := "shuffle"
-	repo := "shuffle-docs"
+	owner := "gsoc2"
+	repo := "gsoc2-docs"
 	path := "docs"
 	_, item1, _, err := client.Repositories.GetContents(ctx, owner, repo, path, nil)
 	if err != nil {
@@ -13715,7 +13715,7 @@ func ValidateNewWorkerExecution(ctx context.Context, body []byte) error {
 		extra := 0
 		for _, trigger := range execution.Workflow.Triggers {
 			//log.Printf("Appname trigger (0): %s", trigger.AppName)
-			if trigger.AppName == "User Input" || trigger.AppName == "Shuffle Workflow" {
+			if trigger.AppName == "User Input" || trigger.AppName == "Gsoc2 Workflow" {
 				extra += 1
 			}
 		}
@@ -13729,7 +13729,7 @@ func ValidateNewWorkerExecution(ctx context.Context, body []byte) error {
 	//log.Printf("\n\nUpdating worker execution info")
 	for _, result := range execution.Results {
 		//log.Printf("%s = %s", result.Action.AppName, result.Status)
-		if result.Action.AppName == "shuffle-subflow" {
+		if result.Action.AppName == "gsoc2-subflow" {
 			if result.Status == "SKIPPED" {
 				continue
 			}
@@ -13794,7 +13794,7 @@ func ValidateNewWorkerExecution(ctx context.Context, body []byte) error {
 					IncrementCache(ctx, execution.ExecutionOrg, "app_executions_failed")
 				} 
 
-				if result.Action.AppName == "Shuffle Workflow" && result.Status == "SUCCESS" {
+				if result.Action.AppName == "Gsoc2 Workflow" && result.Status == "SUCCESS" {
 					IncrementCache(ctx, execution.ExecutionOrg, "subflow_executions")
 				}
 			}
@@ -13962,7 +13962,7 @@ func RunFixParentWorkflowResult(ctx context.Context, execution WorkflowExecution
 								extra := 0
 								for _, trigger := range newParentExecution.Workflow.Triggers {
 									//log.Printf("Appname trigger (0): %s", trigger.AppName)
-									if trigger.AppName == "User Input" || trigger.AppName == "Shuffle Workflow" {
+									if trigger.AppName == "User Input" || trigger.AppName == "Gsoc2 Workflow" {
 										extra += 1
 									}
 								}
@@ -14131,7 +14131,7 @@ func HandleOpenId(resp http.ResponseWriter, request *http.Request) {
 		if err != nil {
 			log.Printf("[WARNING] Error getting org in OpenID: %s", err)
 			resp.WriteHeader(401)
-			resp.Write([]byte(`{"success": false, "reason": "Couldn't find the org for sign-in in Shuffle"}`))
+			resp.Write([]byte(`{"success": false, "reason": "Couldn't find the org for sign-in in Gsoc2"}`))
 			return
 		}
 
@@ -14140,7 +14140,7 @@ func HandleOpenId(resp http.ResponseWriter, request *http.Request) {
 		if len(tokenUrl) == 0 {
 			log.Printf("[ERROR] No token URL specified for OpenID")
 			resp.WriteHeader(401)
-			resp.Write([]byte(fmt.Sprintf(`{"success": false, "reason": "No token URL specified. Please make sure to specify a token URL in the /admin panel in Shuffle for OpenID Connect"}`)))
+			resp.Write([]byte(fmt.Sprintf(`{"success": false, "reason": "No token URL specified. Please make sure to specify a token URL in the /admin panel in Gsoc2 for OpenID Connect"}`)))
 			return
 		}
 
@@ -14251,7 +14251,7 @@ func HandleOpenId(resp http.ResponseWriter, request *http.Request) {
 				}
 
 				if project.Environment == "cloud" {
-					newCookie.Domain = ".shuffler.io"
+					newCookie.Domain = ".soc2.khulnasoft.com.io"
 					newCookie.Secure = true
 					newCookie.HttpOnly = true
 				}
@@ -14305,7 +14305,7 @@ func HandleOpenId(resp http.ResponseWriter, request *http.Request) {
 				}
 
 				if project.Environment == "cloud" {
-					newCookie.Domain = ".shuffler.io"
+					newCookie.Domain = ".soc2.khulnasoft.com.io"
 					newCookie.Secure = true
 					newCookie.HttpOnly = true
 				}
@@ -14395,7 +14395,7 @@ func HandleOpenId(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	if project.Environment == "cloud" {
-		newCookie.Domain = ".shuffler.io"
+		newCookie.Domain = ".soc2.khulnasoft.com.io"
 		newCookie.Secure = true
 		newCookie.HttpOnly = true
 	}
@@ -14439,7 +14439,7 @@ func HandleSSO(resp http.ResponseWriter, request *http.Request) {
 	// Serialize
 
 	// SAML
-	//entryPoint := "https://dev-23367303.okta.com/app/dev-23367303_shuffletest_1/exk1vg1j7bYUYEG0k5d7/sso/saml"
+	//entryPoint := "https://dev-23367303.okta.com/app/dev-23367303_gsoc2test_1/exk1vg1j7bYUYEG0k5d7/sso/saml"
 	redirectUrl := "http://localhost:3001/workflows"
 	backendUrl := os.Getenv("SSO_REDIRECT_URL")
 	if len(backendUrl) == 0 && len(os.Getenv("BASE_URL")) > 0 {
@@ -14451,14 +14451,14 @@ func HandleSSO(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	if project.Environment == "cloud" {
-		redirectUrl = "https://shuffler.io/workflows"
+		redirectUrl = "https://soc2.khulnasoft.com.io/workflows"
 
-		if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-			backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com/workflows", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+		if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+			backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com/workflows", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 		}
 
-		if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-			backendUrl = fmt.Sprintf("%s/workflows", os.Getenv("SHUFFLE_CLOUDRUN_URL"))
+		if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+			backendUrl = fmt.Sprintf("%s/workflows", os.Getenv("GSOC2_CLOUDRUN_URL"))
 		}
 	}
 
@@ -14526,7 +14526,7 @@ func HandleSSO(resp http.ResponseWriter, request *http.Request) {
 
 	// Sample request in keycloak lab env
 	// PS: Should it ever come this way..?
-	//<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" AssertionConsumerServiceURL="http://192.168.55.2:8080/auth/realms/ShuffleSSOSaml/broker/shaffuru/endpoint" Destination="http://192.168.55.2:3001/api/v1/login_sso" ForceAuthn="false" ID="" IssueInstant="2022-01-31T20:24:37.238Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer>http://192.168.55.2:8080/auth/realms/ShuffleSSOSaml</saml:Issuer><samlp:NameIDPolicy AllowCreate="false" Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"/></samlp:AuthnRequest>
+	//<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" AssertionConsumerServiceURL="http://192.168.55.2:8080/auth/realms/Gsoc2SSOSaml/broker/shaffuru/endpoint" Destination="http://192.168.55.2:3001/api/v1/login_sso" ForceAuthn="false" ID="" IssueInstant="2022-01-31T20:24:37.238Z" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Version="2.0"><saml:Issuer>http://192.168.55.2:8080/auth/realms/Gsoc2SSOSaml</saml:Issuer><samlp:NameIDPolicy AllowCreate="false" Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"/></samlp:AuthnRequest>
 
 	var samlResp SAMLResponse
 	err = xml.Unmarshal(bytesXML, &samlResp)
@@ -14658,7 +14658,7 @@ func HandleSSO(resp http.ResponseWriter, request *http.Request) {
 				}
 
 				if project.Environment == "cloud" {
-					newCookie.Domain = ".shuffler.io"
+					newCookie.Domain = ".soc2.khulnasoft.com.io"
 					newCookie.Secure = true
 					newCookie.HttpOnly = true
 				}
@@ -14715,7 +14715,7 @@ func HandleSSO(resp http.ResponseWriter, request *http.Request) {
 				}
 
 				if project.Environment == "cloud" {
-					newCookie.Domain = ".shuffler.io"
+					newCookie.Domain = ".soc2.khulnasoft.com.io"
 					newCookie.Secure = true
 					newCookie.HttpOnly = true
 				}
@@ -14806,7 +14806,7 @@ func HandleSSO(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	if project.Environment == "cloud" {
-		newCookie.Domain = ".shuffler.io"
+		newCookie.Domain = ".soc2.khulnasoft.com.io"
 		newCookie.Secure = true
 		newCookie.HttpOnly = true
 	}
@@ -15253,12 +15253,12 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 						log.Printf("[DEBUG] Sending result to self: %s", string(fullMarshal))
 
 						backendUrl := os.Getenv("BASE_URL")
-						if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-							backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+						if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+							backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 						}
 
-						if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-							backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+						if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+							backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 						}
 
 						topClient := &http.Client{
@@ -15332,7 +15332,7 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 			*/
 
 			// Add new execution to queue?
-			//if os.Getenv("SHUFFLE_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
+			//if os.Getenv("GSOC2_SWARM_CONFIG") == "run" && (project.Environment == "" || project.Environment == "worker") {
 
 			return *oldExecution, ExecInfo{}, "", errors.New("User Input")
 		}
@@ -15524,7 +15524,7 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 		// Fill in apikey?
 		if project.Environment == "cloud" {
 
-			if (action.AppName == "Shuffle Tools" || action.AppName == "email") && action.Name == "send_email_shuffle" || action.Name == "send_sms_shuffle" {
+			if (action.AppName == "Gsoc2 Tools" || action.AppName == "email") && action.Name == "send_email_gsoc2" || action.Name == "send_sms_gsoc2" {
 				for paramKey, param := range action.Parameters {
 					// Autoreplace in general, even if there is a key. Overwrite previous configs to ensure this becomes the norm. Frontend also matches.
 					if param.Name == "apikey" {
@@ -15578,7 +15578,7 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 
 			if len(action.Environment) == 0 {
 				log.Printf("[ERROR] Environment is not defined for action %s in workflow %s (%s)", action.Name, workflowExecution.Workflow.Name, workflowExecution.Workflow.ID)
-				action.Environment = "shuffle"
+				action.Environment = "gsoc2"
 			}
 
 			if len(action.Environment) > 0 {
@@ -15824,7 +15824,7 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 			extra := 0
 			for _, trigger := range workflowExecution.Workflow.Triggers {
 				//log.Printf("Appname trigger (0): %s", trigger.AppName)
-				if trigger.AppName == "User Input" || trigger.AppName == "Shuffle Workflow" {
+				if trigger.AppName == "User Input" || trigger.AppName == "Gsoc2 Workflow" {
 					extra += 1
 				}
 			}
@@ -15915,7 +15915,7 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 			}
 		}
 
-		if trigger.AppName == "User Input" || trigger.AppName == "Shuffle Workflow" {
+		if trigger.AppName == "User Input" || trigger.AppName == "Gsoc2 Workflow" {
 			found := false
 			for _, node := range childNodes {
 				if node == trigger.ID {
@@ -15928,7 +15928,7 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 				//log.Printf("SHOULD SET TRIGGER %s TO BE SKIPPED", trigger.ID)
 
 				curaction := Action{
-					AppName:    "shuffle-subflow",
+					AppName:    "gsoc2-subflow",
 					AppVersion: trigger.AppVersion,
 					Label:      trigger.Label,
 					Name:       trigger.Name,
@@ -16124,7 +16124,7 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 			action.Label = trigger.Label
 			action.ID = trigger.ID
 			action.Name = "run_subflow"
-			action.AppName = "shuffle-subflow"
+			action.AppName = "gsoc2-subflow"
 			action.AppVersion = "1.0.0"
 
 			action.Parameters = []WorkflowAppActionParameter{}
@@ -16163,12 +16163,12 @@ func PrepareWorkflowExecution(ctx context.Context, workflow Workflow, request *h
 			})
 
 			backendUrl := os.Getenv("BASE_URL")
-			if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-				backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+			if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+				backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 			}
 
-			if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 && strings.Contains(os.Getenv("SHUFFLE_CLOUDRUN_URL"), "http") {
-				backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+			if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 && strings.Contains(os.Getenv("GSOC2_CLOUDRUN_URL"), "http") {
+				backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 			}
 
 			if len(backendUrl) > 0 {
@@ -16347,7 +16347,7 @@ func findReferenceAppDocs(ctx context.Context, allApps []WorkflowApp) []Workflow
 	return allApps
 
 	for _, app := range allApps {
-		if len(app.ReferenceInfo.DocumentationUrl) > 0 && strings.HasPrefix(app.ReferenceInfo.DocumentationUrl, "https://raw.githubusercontent.com/Shuffle") && strings.Contains(app.ReferenceInfo.DocumentationUrl, ".md") {
+		if len(app.ReferenceInfo.DocumentationUrl) > 0 && strings.HasPrefix(app.ReferenceInfo.DocumentationUrl, "https://raw.githubusercontent.com/Gsoc2") && strings.Contains(app.ReferenceInfo.DocumentationUrl, ".md") {
 			// Should find documentation from the github (only if github?) and add it to app.Documentation before caching
 			//log.Printf("DOCS: %s", app.ReferenceInfo.DocumentationUrl)
 			documentationData, err := DownloadFromUrl(ctx, app.ReferenceInfo.DocumentationUrl)
@@ -16364,7 +16364,7 @@ func findReferenceAppDocs(ctx context.Context, allApps []WorkflowApp) []Workflow
 
 			if app.Generated {
 				//log.Printf("[DEBUG] Should look in the OpenAPI folder")
-				baseUrl := "https://raw.githubusercontent.com/Shuffle/openapi-apps/master/docs"
+				baseUrl := "https://raw.githubusercontent.com/Gsoc2/openapi-apps/master/docs"
 
 				newName := strings.ToLower(strings.Replace(strings.Replace(app.Name, " ", "_", -1), "-", "_", -1))
 				referenceUrl = fmt.Sprintf("%s/%s.md", baseUrl, newName)
@@ -16836,7 +16836,7 @@ func HandleStreamWorkflow(resp http.ResponseWriter, request *http.Request) {
 		} else if workflow.Public {
 			log.Printf("[AUDIT] Letting user %s access workflow %s for streaming because it's public (get workflow stream)", user.Username, workflow.ID)
 
-		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@shuffler.io") {
+		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@soc2.khulnasoft.com.io") {
 			log.Printf("[AUDIT] Letting verified support admin %s access workflow %s", user.Username, workflow.ID)
 		} else {
 			log.Printf("[AUDIT] Wrong user (%s) for workflow %s (get workflow stream)", user.Username, workflow.ID)
@@ -17025,8 +17025,8 @@ func UpdateUsecases(resp http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	// Needs to be an active shuffler.io account to update
-	if project.Environment == "cloud" && !strings.HasSuffix(user.Username, "@shuffler.io") {
+	// Needs to be an active soc2.khulnasoft.com.io account to update
+	if project.Environment == "cloud" && !strings.HasSuffix(user.Username, "@soc2.khulnasoft.com.io") {
 		resp.WriteHeader(403)
 		resp.Write([]byte(`{"success": false, "reason": "Can't change framework info"}`))
 		return
@@ -17115,22 +17115,22 @@ func HandleGetUsecase(resp http.ResponseWriter, request *http.Request) {
 			ExtraButton{
 				Name:  "IMAP",
 				App:   "Email",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/email_ec25da1fdbf18934ca468788b73bec32.png",
-				Link:  "https://shuffler.io/workflows/b65d180c-4d27-4cb6-8128-3687a08aadb3",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/email_ec25da1fdbf18934ca468788b73bec32.png",
+				Link:  "https://soc2.khulnasoft.com.io/workflows/b65d180c-4d27-4cb6-8128-3687a08aadb3",
 				Type:  "communication",
 			},
 			ExtraButton{
 				Name:  "Gmail",
 				App:   "Gmail",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Gmail_794e51c3c1a8b24b89ccc573a3defc47.png",
-				Link:  "https://shuffler.io/workflows/e506060f-0c58-4f95-a0b8-f671103d78e5",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Gmail_794e51c3c1a8b24b89ccc573a3defc47.png",
+				Link:  "https://soc2.khulnasoft.com.io/workflows/e506060f-0c58-4f95-a0b8-f671103d78e5",
 				Type:  "communication",
 			},
 			ExtraButton{
 				Name:  "Outlook",
 				App:   "Outlook Graph",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Outlook_graph_d71641a57deeee8149df99080adebeb7.png",
-				Link:  "https://shuffler.io/workflows/3862ed8f-7801-4393-8524-05de8f8a401d",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Outlook_graph_d71641a57deeee8149df99080adebeb7.png",
+				Link:  "https://soc2.khulnasoft.com.io/workflows/3862ed8f-7801-4393-8524-05de8f8a401d",
 				Type:  "communication",
 			},
 		}
@@ -17139,22 +17139,22 @@ func HandleGetUsecase(resp http.ResponseWriter, request *http.Request) {
 			ExtraButton{
 				Name:  "Velociraptor",
 				App:   "Velociraptor",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/velociraptor_63de9fc91bcb4813d9c58cc6efd49b33.png",
-				Link:  "https://shuffler.io/apps/63de9fc91bcb4813d9c58cc6efd49b33",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/velociraptor_63de9fc91bcb4813d9c58cc6efd49b33.png",
+				Link:  "https://soc2.khulnasoft.com.io/apps/63de9fc91bcb4813d9c58cc6efd49b33",
 				Type:  "edr",
 			},
 			ExtraButton{
 				Name:  "Carbon Black",
 				App:   "Carbon Black",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Carbon_Black_Response_e9fa2602ea6baafffa4b5eec722095d3.png",
-				Link:  "https://shuffler.io/apps/e9fa2602ea6baafffa4b5eec722095d3",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Carbon_Black_Response_e9fa2602ea6baafffa4b5eec722095d3.png",
+				Link:  "https://soc2.khulnasoft.com.io/apps/e9fa2602ea6baafffa4b5eec722095d3",
 				Type:  "edr",
 			},
 			ExtraButton{
 				Name:  "Crowdstrike",
 				App:   "Crowdstrike",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Crowdstrike_Falcon_7a66ce3c26e0d724f31f1ebc9a7a41b4.png",
-				Link:  "https://shuffler.io/apps/7a66ce3c26e0d724f31f1ebc9a7a41b4",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Crowdstrike_Falcon_7a66ce3c26e0d724f31f1ebc9a7a41b4.png",
+				Link:  "https://soc2.khulnasoft.com.io/apps/7a66ce3c26e0d724f31f1ebc9a7a41b4",
 				Type:  "edr",
 			},
 		}
@@ -17163,22 +17163,22 @@ func HandleGetUsecase(resp http.ResponseWriter, request *http.Request) {
 			ExtraButton{
 				Name:  "Wazuh",
 				App:   "Wazuh",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Wazuh_fb715a176a192687e95e9d162186c97f.png",
-				Link:  "https://shuffler.io/workflows/bb45124c-d39e-4acc-a5d9-f8aa526042b5",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Wazuh_fb715a176a192687e95e9d162186c97f.png",
+				Link:  "https://soc2.khulnasoft.com.io/workflows/bb45124c-d39e-4acc-a5d9-f8aa526042b5",
 				Type:  "siem",
 			},
 			ExtraButton{
 				Name:  "Splunk",
 				App:   "Splunk",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Splunk_Splunk_e352462c6d2f0a692281600d96002a45.png",
-				Link:  "https://shuffler.io/apps/441a2d85f6c1e8408dd1ee1e804cd241",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Splunk_Splunk_e352462c6d2f0a692281600d96002a45.png",
+				Link:  "https://soc2.khulnasoft.com.io/apps/441a2d85f6c1e8408dd1ee1e804cd241",
 				Type:  "siem",
 			},
 			ExtraButton{
 				Name:  "QRadar",
 				App:   "QRadar",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/QRadar_4fe358bd204f672d37c55b4f1d48ccdb.png",
-				Link:  "https://shuffler.io/apps/96a3d95a2a73cfdb51ea4a394287ed33",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/QRadar_4fe358bd204f672d37c55b4f1d48ccdb.png",
+				Link:  "https://soc2.khulnasoft.com.io/apps/96a3d95a2a73cfdb51ea4a394287ed33",
 				Type:  "siem",
 			},
 		}
@@ -17187,22 +17187,22 @@ func HandleGetUsecase(resp http.ResponseWriter, request *http.Request) {
 			ExtraButton{
 				Name:  "Webex",
 				App:   "Webex",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Webex_1f6f2fc4fd399597e98ff34f78f56c45.png",
-				Link:  "https://shuffler.io/workflows/88e16093-37b7-41cf-b02b-d1ca0e737993",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Webex_1f6f2fc4fd399597e98ff34f78f56c45.png",
+				Link:  "https://soc2.khulnasoft.com.io/workflows/88e16093-37b7-41cf-b02b-d1ca0e737993",
 				Type:  "communication",
 			},
 			ExtraButton{
 				Name:  "Teams",
 				App:   "Microsoft Teams",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Microsoft_Teams_User_Access_4826c529f8082205a4b926ac9f1dfcfb.png",
-				Link:  "https://shuffler.io/apps/4826c529f8082205a4b926ac9f1dfcfb",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Microsoft_Teams_User_Access_4826c529f8082205a4b926ac9f1dfcfb.png",
+				Link:  "https://soc2.khulnasoft.com.io/apps/4826c529f8082205a4b926ac9f1dfcfb",
 				Type:  "communication",
 			},
 			ExtraButton{
 				Name:  "Slack",
 				App:   "Slack",
-				Image: "https://storage.googleapis.com/shuffle_public/app_images/Slack_Web_API_f63a65ddf0ee369845b6918575d47fc1.png",
-				Link:  "https://shuffler.io/workflows/0a7eeca9-e056-40e5-9a70-f078937c6055",
+				Image: "https://storage.googleapis.com/gsoc2_public/app_images/Slack_Web_API_f63a65ddf0ee369845b6918575d47fc1.png",
+				Link:  "https://soc2.khulnasoft.com.io/workflows/0a7eeca9-e056-40e5-9a70-f078937c6055",
 				Type:  "communication",
 			},
 		}
@@ -17226,12 +17226,12 @@ func GetBackendexecution(ctx context.Context, executionId, authorization string)
 	// Is polling the backend actually correct?
 	// Or should worker/backend talk to itself?
 	backendUrl := os.Getenv("BASE_URL")
-	if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-		backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+	if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+		backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 	}
 
-	if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-		backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+		backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 	}
 
 	// Should this be without worker? :thinking:
@@ -17339,7 +17339,7 @@ func AddPriority(org Org, priority Priority, updated bool) (*Org, bool) {
 	return &org, updated
 }
 
-// Watch academy - Shuffle 101 if you're new
+// Watch academy - Gsoc2 101 if you're new
 // Check notifications
 // Check if all apps have been discovered
 // Check if notification workflow is made
@@ -17382,8 +17382,8 @@ func GetPriorities(ctx context.Context, user User, org *Org) ([]Priority, error)
 	// Notify about hybrid
 	if project.Environment == "cloud" {
 		org, updated = AddPriority(*org, Priority{
-			Name:        fmt.Sprintf("Try Hybrid Shuffle by connecting environments"),
-			Description: "Hybrid Shuffle allows you to connect Shuffle to your local datacenter(s) internal resources, and get the results in the cloud.",
+			Name:        fmt.Sprintf("Try Hybrid Gsoc2 by connecting environments"),
+			Description: "Hybrid Gsoc2 allows you to connect Gsoc2 to your local datacenter(s) internal resources, and get the results in the cloud.",
 			Type:        "hybrid",
 			Active:      true,
 			URL:         fmt.Sprintf("/admin?tab=environments"),
@@ -17774,7 +17774,7 @@ func DecideExecution(ctx context.Context, workflowExecution WorkflowExecution, e
 		extra = 0
 
 		for _, trigger := range workflowExecution.Workflow.Triggers {
-			if (trigger.Name == "User Input" && trigger.AppName == "User Input") || (trigger.Name == "Shuffle Workflow" && trigger.AppName == "Shuffle Workflow") {
+			if (trigger.Name == "User Input" && trigger.AppName == "User Input") || (trigger.Name == "Gsoc2 Workflow" && trigger.AppName == "Gsoc2 Workflow") {
 				extra += 1
 			}
 		}
@@ -17967,7 +17967,7 @@ func DecideExecution(ctx context.Context, workflowExecution WorkflowExecution, e
 			continue
 		}
 
-		if action.AppName == "Shuffle Workflow" {
+		if action.AppName == "Gsoc2 Workflow" {
 			branchesFound := 0
 			parentFinished := 0
 
@@ -17993,7 +17993,7 @@ func DecideExecution(ctx context.Context, workflowExecution WorkflowExecution, e
 			//log.Printf("[DEBUG] Should execute %s (?). Branches: %d. Parents done: %d", action.AppName, branchesFound, parentFinished)
 			if branchesFound == parentFinished {
 				action.Environment = environment
-				action.AppName = "shuffle-subflow"
+				action.AppName = "gsoc2-subflow"
 				action.Name = "run_subflow"
 				action.AppVersion = "1.0.0"
 
@@ -18042,12 +18042,12 @@ func DecideExecution(ctx context.Context, workflowExecution WorkflowExecution, e
 				})
 
 				backendUrl := os.Getenv("BASE_URL")
-				if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-					backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+				if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+					backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 				}
 
-				if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-					backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+				if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+					backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 				}
 
 				if len(backendUrl) > 0 {
@@ -18130,7 +18130,7 @@ func DecideExecution(ctx context.Context, workflowExecution WorkflowExecution, e
 					}
 
 					action.Environment = environment
-					action.AppName = "shuffle-subflow"
+					action.AppName = "gsoc2-subflow"
 					action.Name = "run_userinput"
 					action.AppVersion = "1.1.0"
 
@@ -18192,17 +18192,17 @@ func DecideExecution(ctx context.Context, workflowExecution WorkflowExecution, e
 					})
 
 					backendUrl := os.Getenv("BASE_URL")
-					if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-						backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+					if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+						backendUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 					}
 
-					if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-						backendUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+					if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+						backendUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 					}
 
 					// Fallback
 					if len(backendUrl) == 0 {
-						backendUrl = "https://shuffler.io"
+						backendUrl = "https://soc2.khulnasoft.com.io"
 					}
 
 					if len(backendUrl) > 0 {
@@ -18249,7 +18249,7 @@ func DecideExecution(ctx context.Context, workflowExecution WorkflowExecution, e
 			// FIXME? This was a test to check if a result was finished or not after a certain time. Not viable for production (obv)
 
 			//time.Sleep(1 * time.Second)
-			//validateExecution, err := shuffle.GetWorkflowExecution(ctx, workflowExecution.ExecutionId)
+			//validateExecution, err := gsoc2.GetWorkflowExecution(ctx, workflowExecution.ExecutionId)
 			//if err == nil {
 			//	skipAction := false
 			//	for _, result := range validateExecution.Results {
@@ -18285,7 +18285,7 @@ func GetExternalClient(baseUrl string) *http.Client {
 	transport.Proxy = nil
 
 	skipSSLVerify := false
-	if strings.ToLower(os.Getenv("SHUFFLE_OPENSEARCH_SKIPSSL_VERIFY")) == "true" {
+	if strings.ToLower(os.Getenv("GSOC2_OPENSEARCH_SKIPSSL_VERIFY")) == "true" {
 		log.Printf("[DEBUG] SKIPPING SSL verification with Opensearch")
 		skipSSLVerify = true
 	}
@@ -18297,7 +18297,7 @@ func GetExternalClient(baseUrl string) *http.Client {
 
 	//getStats()
 
-	if (len(httpProxy) > 0 || len(httpsProxy) > 0) && baseUrl != "http://shuffle-backend:5001" {
+	if (len(httpProxy) > 0 || len(httpsProxy) > 0) && baseUrl != "http://gsoc2-backend:5001" {
 		//client = &http.Client{}
 	} else {
 		if len(httpProxy) > 0 {
@@ -18576,7 +18576,7 @@ func RunCategoryAction(resp http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Printf("[WARNING] Failed getting apps in category action: %s", err)
 		resp.WriteHeader(500)
-		resp.Write([]byte(`{"success": false, "reason": "Failed loading apps. Contact support@shuffler.io"}`))
+		resp.Write([]byte(`{"success": false, "reason": "Failed loading apps. Contact support@soc2.khulnasoft.com.io"}`))
 		return
 	}
 
@@ -18712,13 +18712,13 @@ func RunCategoryAction(resp http.ResponseWriter, request *http.Request) {
 	environment := "Cloud"
 	// FIXME: Make it dynamic based on the default env
 	if project.Environment != "cloud" {
-		environment = "Shuffle"
+		environment = "Gsoc2"
 	}
 
 	startAction := Action{
 		Name:        "get_standardized_data",
 		Label:       "Get standardized data",
-		AppName:     "Shuffle Tools",
+		AppName:     "Gsoc2 Tools",
 		AppVersion:  "1.2.0",
 		AppID:       "3e2bdf9d5069fe3f4746c29d68785a6a",
 		Environment: environment,
@@ -18759,11 +18759,11 @@ func RunCategoryAction(resp http.ResponseWriter, request *http.Request) {
 	refUrl := ""
 	if project.Environment == "cloud" {
 		location := "europe-west2"
-		if len(os.Getenv("SHUFFLE_GCEPROJECT_REGION")) > 0 {
-			location = os.Getenv("SHUFFLE_GCEPROJECT_REGION")
+		if len(os.Getenv("GSOC2_GCEPROJECT_REGION")) > 0 {
+			location = os.Getenv("GSOC2_GCEPROJECT_REGION")
 		}
 
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
 		functionName := fmt.Sprintf("%s-%s", selectedApp.Name, selectedApp.ID)
 		functionName = strings.ToLower(strings.Replace(strings.Replace(strings.Replace(strings.Replace(strings.Replace(functionName, "_", "-", -1), ":", "-", -1), "-", "-", -1), " ", "-", -1), ".", "-", -1))
 
@@ -18882,13 +18882,13 @@ func RunCategoryAction(resp http.ResponseWriter, request *http.Request) {
 	newExecBody, _ := json.Marshal(execData)
 
 	// Starting execution
-	streamUrl := fmt.Sprintf("https://shuffler.io")
-	if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-		streamUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+	streamUrl := fmt.Sprintf("https://soc2.khulnasoft.com.io")
+	if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+		streamUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 	}
 
-	if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-		streamUrl = fmt.Sprintf("%s", os.Getenv("SHUFFLE_CLOUDRUN_URL"))
+	if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+		streamUrl = fmt.Sprintf("%s", os.Getenv("GSOC2_CLOUDRUN_URL"))
 	}
 
 	streamUrl = fmt.Sprintf("%s/api/v1/workflows/%s/execute", streamUrl, newWorkflow.ID)
@@ -18963,7 +18963,7 @@ func GetActiveCategories(resp http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Printf("[WARNING] Failed getting apps in category action: %s", err)
 		resp.WriteHeader(500)
-		resp.Write([]byte(`{"success": false, "reason": "Failed loading apps. Contact support@shuffler.io"}`))
+		resp.Write([]byte(`{"success": false, "reason": "Failed loading apps. Contact support@soc2.khulnasoft.com.io"}`))
 		return
 	}
 
@@ -19155,7 +19155,7 @@ func HandleActionRecommendation(resp http.ResponseWriter, request *http.Request)
 	// Point with cloud download it to have it regularly updated
 	if project.Environment != "cloud" {
 		resp.WriteHeader(200)
-		resp.Write([]byte(`{"success": true, "reason": "Not yet enabled. Contact support@shuffler.io to learn more about progress on this API."}`))
+		resp.Write([]byte(`{"success": true, "reason": "Not yet enabled. Contact support@soc2.khulnasoft.com.io to learn more about progress on this API."}`))
 		return
 	}
 
@@ -19244,7 +19244,7 @@ func HandleActionRecommendation(resp http.ResponseWriter, request *http.Request)
 
 				foundApp = app
 
-				if foundApp.Name == "Shuffle Tools" {
+				if foundApp.Name == "Gsoc2 Tools" {
 					inputAction.CategoryLabel = []string{inputAction.Name}
 					break
 				}
@@ -19324,14 +19324,14 @@ func HandleActionRecommendation(resp http.ResponseWriter, request *http.Request)
 				recommendation := Recommendations{}
 				if foundAppType == "tools" {
 					recommendation = Recommendations{
-						AppName: "Shuffle Tools",
+						AppName: "Gsoc2 Tools",
 						AppAction: outgoing.Name,
 						AppVersion: "1.2.0",
 						AppId: "bc78f35c6c6351b07a09b7aed5d29652",
 					}
 				} else if categoryname == "subflow" {
 					recommendation = Recommendations{
-						AppName: "Shuffle Subflow",
+						AppName: "Gsoc2 Subflow",
 						AppVersion: "1.1.0",
 						AppAction: "subflow",
 						AppId: "a891257fcf905c2d256ce5674282864c",
@@ -20021,7 +20021,7 @@ func GetWorkflowRevisions(resp http.ResponseWriter, request *http.Request) {
 			log.Printf("[AUDIT] User %s is accessing workflow %s as admin (get workflow)", user.Username, workflow.ID)
 
 			// Only for Read-Only. No executions or impersonations.
-		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@shuffler.io") {
+		} else if project.Environment == "cloud" && user.Verified == true && user.Active == true && user.SupportAccess == true && strings.HasSuffix(user.Username, "@soc2.khulnasoft.com.io") {
 			log.Printf("[AUDIT] Letting verified support admin %s access workflow %s", user.Username, workflow.ID)
 		} else {
 			log.Printf("[AUDIT] Wrong user (%s) for workflow %s (get workflow). Verified: %t, Active: %t, SupportAccess: %t, Username: %s", user.Username, workflow.ID, user.Verified, user.Active, user.SupportAccess, user.Username)
@@ -20059,11 +20059,11 @@ func HandleDeleteOrg(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	// Checking if it's a special region. All user-specific requests should
-	// go through shuffler.io and not subdomains
+	// go through soc2.khulnasoft.com.io and not subdomains
 	if project.Environment == "cloud" {
-		gceProject := os.Getenv("SHUFFLE_GCEPROJECT")
-		if gceProject != "shuffler" && gceProject != sandboxProject && len(gceProject) > 0 {
-			log.Printf("[DEBUG] Redirecting GET ORG request to main site handler (shuffler.io)")
+		gceProject := os.Getenv("GSOC2_GCEPROJECT")
+		if gceProject != "soc2.khulnasoft.com" && gceProject != sandboxProject && len(gceProject) > 0 {
+			log.Printf("[DEBUG] Redirecting GET ORG request to main site handler (soc2.khulnasoft.com.io)")
 			RedirectUserRequest(resp, request)
 			return
 		}

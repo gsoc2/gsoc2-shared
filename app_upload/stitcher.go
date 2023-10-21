@@ -1,6 +1,6 @@
 package main
 
-// This is intended to upload apps from https://github.com/Shuffle/python-apps to the cloud instance of shuffle (https://shuffler.io). It does so by looping and finding all the apps, building the code with the SDK, and serving it as a Cloud Function.
+// This is intended to upload apps from https://github.com/Gsoc2/python-apps to the cloud instance of gsoc2 (https://soc2.khulnasoft.com.io). It does so by looping and finding all the apps, building the code with the SDK, and serving it as a Cloud Function.
 
 // This can be used to update normal apps, but app-creator apps should be updated by the shaffuru/functions/cloud_scripts/update_functions.go script in case there is a new App SDK.
 
@@ -33,16 +33,16 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var gceProject = "shuffler"
-var bucketName = "shuffler.appspot.com"
-var publicBucket = "shuffle_public"
+var gceProject = "soc2.khulnasoft.com"
+var bucketName = "soc2.khulnasoft.com.appspot.com"
+var publicBucket = "gsoc2_public"
 var gceRegion = "europe-west2"
 
 var appSearchIndex = "appsearch"
 
 // CONFIGURE APP LOCATIONS TO USE
 // ALSO REQUIRES ACCESS TO UPLOAD TO CLOUD
-var appbasefile = "/Users/frikky/git/shuffle/backend/app_sdk/app_base.py"
+var appbasefile = "/Users/frikky/git/gsoc2/backend/app_sdk/app_base.py"
 var appfolder = "/Users/frikky/git/python-apps"
 var baseUrl = ""
 var apikey = ""
@@ -255,7 +255,7 @@ func addRequirements(filelocation string) {
 	//	return
 	//}
 
-	filedata := shuffle.GetAppRequirements() + string(data)
+	filedata := gsoc2.GetAppRequirements() + string(data)
 	err = ioutil.WriteFile(filelocation, []byte(filedata), os.ModePerm)
 	if err != nil {
 		log.Panicf("[WARNING] failed writing data to file: %s", err)
@@ -410,10 +410,10 @@ func deployFunction(appname, localization, applocation string, environmentVariab
 	projectsLocationsFunctionsService := cloudfunctions.NewProjectsLocationsFunctionsService(service)
 	location := fmt.Sprintf("projects/%s/locations/%s", gceProject, localization)
 	functionName := fmt.Sprintf("%s/functions/%s", location, appname)
-	serviceAccountEmail := "shuffle-apps@shuffler.iam.gserviceaccount.com"
+	serviceAccountEmail := "gsoc2-apps@soc2.khulnasoft.com.iam.gserviceaccount.com"
 
 	if len(gceProject) > 0 {
-		serviceAccountEmail = fmt.Sprintf("shuffle-apps@%s.iam.gserviceaccount.com", gceProject)
+		serviceAccountEmail = fmt.Sprintf("gsoc2-apps@%s.iam.gserviceaccount.com", gceProject)
 	}
 
 	log.Printf("[INFO] Uploading function %#v for email %#v", functionName, serviceAccountEmail)
@@ -494,8 +494,8 @@ func deployAppCloudFunc(appname string, appversion string) {
 
 	fullAppname := fmt.Sprintf("%s-%s", strings.Replace(appname, "_", "-", -1), strings.Replace(appversion, ".", "-", -1))
 	locations := []string{gceRegion}
-	if len(os.Getenv("SHUFFLE_GCE_LOCATION")) > 0 {
-		locations = []string{os.Getenv("SHUFFLE_GCE_LOCATION")}
+	if len(os.Getenv("GSOC2_GCE_LOCATION")) > 0 {
+		locations = []string{os.Getenv("GSOC2_GCE_LOCATION")}
 	}
 
 	// Deploys the app to all locations
@@ -507,7 +507,7 @@ func deployAppCloudFunc(appname string, appversion string) {
 
 	//"FUNCTION_APIKEY": apikey,
 	environmentVariables := map[string]string{
-		"SHUFFLE_LOGS_DISABLED": "true",
+		"GSOC2_LOGS_DISABLED": "true",
 	}
 
 	for _, location := range locations {
@@ -520,19 +520,19 @@ func deployAppCloudFunc(appname string, appversion string) {
 	}
 }
 
-func loadYaml(fileLocation string) (shuffle.WorkflowApp, error) {
-	action := shuffle.WorkflowApp{}
+func loadYaml(fileLocation string) (gsoc2.WorkflowApp, error) {
+	action := gsoc2.WorkflowApp{}
 
 	yamlFile, err := ioutil.ReadFile(fileLocation)
 	if err != nil {
 		log.Printf("[WARNING] yamlFile.Get err: %s", err)
-		return shuffle.WorkflowApp{}, err
+		return gsoc2.WorkflowApp{}, err
 	}
 
 	//log.Printf(string(yamlFile))
 	err = yaml.Unmarshal([]byte(yamlFile), &action)
 	if err != nil {
-		return shuffle.WorkflowApp{}, err
+		return gsoc2.WorkflowApp{}, err
 	}
 
 	if action.ID == "" {
@@ -817,22 +817,22 @@ func deployAll() {
 }
 
 func main() {
-	//addRequirements("generated_apps/shuffle-tools_1.0.0/requirements.txt")
+	//addRequirements("generated_apps/gsoc2-tools_1.0.0/requirements.txt")
 	if len(os.Args) < 3 {
-		log.Printf("[WARNING] Missing arguments. <> are NOT required. Input: go run stitcher.go APIKEY URL <GCEPROJECT> <GCE_REGION> <BUCKETNAME>\n\n\nSample: go run stitcher.go APIKEY https://ca.shuffler.io shuffle-na-northeast1 northamerica-northeast1 shuffle_org_files_na_northeast1") 
+		log.Printf("[WARNING] Missing arguments. <> are NOT required. Input: go run stitcher.go APIKEY URL <GCEPROJECT> <GCE_REGION> <BUCKETNAME>\n\n\nSample: go run stitcher.go APIKEY https://ca.soc2.khulnasoft.com.io gsoc2-na-northeast1 northamerica-northeast1 gsoc2_org_files_na_northeast1") 
 		return
 	}
 
-	if len(os.Getenv("SHUFFLE_ORG_BUCKET")) > 0 {
-		bucketName = os.Getenv("SHUFFLE_ORG_BUCKET")
+	if len(os.Getenv("GSOC2_ORG_BUCKET")) > 0 {
+		bucketName = os.Getenv("GSOC2_ORG_BUCKET")
 	}
 
-	if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 {
-		gceProject = os.Getenv("SHUFFLE_GCEPROJECT")
+	if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 {
+		gceProject = os.Getenv("GSOC2_GCEPROJECT")
 	}
 
-	if len(os.Getenv("SHUFFLE_GCEPROJECT_REGION")) > 0 {
-		gceRegion = os.Getenv("SHUFFLE_GCEPROJECT_REGION")
+	if len(os.Getenv("GSOC2_GCEPROJECT_REGION")) > 0 {
+		gceRegion = os.Getenv("GSOC2_GCEPROJECT_REGION")
 	}
 
 	baseUrl = os.Args[2]

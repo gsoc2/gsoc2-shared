@@ -1,4 +1,4 @@
-package shuffle
+package gsoc2
 
 import (
 	"fmt"
@@ -197,16 +197,16 @@ func HandleNewWidget(resp http.ResponseWriter, request *http.Request) {
 			return
 		}
 
-		// Let remote endpoint handle access checks (shuffler.io)
-		baseUrl := "https://shuffler.io"
-		if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-			baseUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+		// Let remote endpoint handle access checks (soc2.khulnasoft.com.io)
+		baseUrl := "https://soc2.khulnasoft.com.io"
+		if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+			baseUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 		}
 
 		currentUrl := fmt.Sprintf("%s/api/v1/hooks/webhook_%s", baseUrl, newId)
 		startNode := requestdata.Start
 		if requestdata.Environment == "cloud" && project.Environment != "cloud" {
-			// https://shuffler.io/v1/hooks/webhook_80184973-3e82-4852-842e-0290f7f34d7c
+			// https://soc2.khulnasoft.com.io/v1/hooks/webhook_80184973-3e82-4852-842e-0290f7f34d7c
 			log.Printf("[INFO] Should START a cloud webhook for url %s for startnode %s", currentUrl, startNode)
 			org, err := GetOrg(ctx, user.ActiveOrg.Id)
 			if err != nil {

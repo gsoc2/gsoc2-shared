@@ -1,4 +1,4 @@
-package shuffle
+package gsoc2
 
 import (
 	"encoding/xml"
@@ -428,8 +428,8 @@ type PublicProfile struct {
 	WorkStatus          string              `datastore:"work_status" json:"work_status"`
 	Banner              string              `datastore:"banner" json:"banner"`
 	GithubContributions GithubContributions `datastore:"github_contributions" json:"github_contributions"`
-	ShuffleEarnings     string              `datastore:"shuffle_earnings" json:"shuffle_earnings"`
-	ShuffleRanking      string              `datastore:"shuffle_ranking" json:"shuffle_ranking"`
+	Gsoc2Earnings     string              `datastore:"gsoc2_earnings" json:"gsoc2_earnings"`
+	soc2.khulnasoft.comanking      string              `datastore:"gsoc2_ranking" json:"gsoc2_ranking"`
 
 	Skills          []string        `json:"skills"`
 	Synonyms        []string        `json:"synonyms"`
@@ -1372,7 +1372,7 @@ type TriggerAuth struct {
 }
 
 // This is what the structure should be when it's sent into a workflow
-type ParsedShuffleMail struct {
+type ParsedGsoc2Mail struct {
 	Body struct {
 		URI           []string `json:"uri"`
 		Email         []string `json:"email"`
@@ -2946,7 +2946,7 @@ type OrborusExecutionRequest struct {
 	EnvironmentName       string            `json:"environment_name"`
 	Timezone              string            `json:"timezone"`
 	Cleanup               string            `json:"cleanup"`
-	ShufflePassProxyToApp string            `json:"shuffle_pass_proxy_to_app"`
+	Gsoc2PassProxyToApp string            `json:"gsoc2_pass_proxy_to_app"`
 	Action                Action            `json:"action"`
 	FullExecution         WorkflowExecution `json:"workflow_execution"`
 	WorkerServerUrl       string            `json:"worker_server_url"`
@@ -3420,7 +3420,7 @@ type OrborusStats struct {
 	Swarm        bool   `json:"swarm"`
 	Kubernetes   bool   `json:"kubernetes"`
 
-	// Shuffle
+	// Gsoc2
 	MaxQueue int `json:"max_queue"`
 	Queue    int `json:"queue"`
 	PollTime int `json:"poll_time"`

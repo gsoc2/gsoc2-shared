@@ -1,6 +1,6 @@
-package shuffle
+package gsoc2
 
-// Shuffle is an automation platform for security and IT. This app and the associated scopes enables us to get information about a user, their mailbox and eventually subscribing them to send pub/sub requests to our platform to handle their emails in real-time, before controlling how to handle the data themselves.
+// Gsoc2 is an automation platform for security and IT. This app and the associated scopes enables us to get information about a user, their mailbox and eventually subscribing them to send pub/sub requests to our platform to handle their emails in real-time, before controlling how to handle the data themselves.
 
 import (
 	"bytes"
@@ -217,7 +217,7 @@ func GetOutlookBody(ctx context.Context, hook Hook, body []byte) string {
 			}
 
 			timeNow := time.Now().Unix()
-			var basepath = os.Getenv("SHUFFLE_FILE_LOCATION")
+			var basepath = os.Getenv("GSOC2_FILE_LOCATION")
 			if len(basepath) == 0 {
 				basepath = "files"
 			}
@@ -312,7 +312,7 @@ func getOutlookProfile(client *http.Client) (OutlookProfile, error) {
 }
 
 // FIXME:
-// 1. Should find contributions to Shuffle repo's for the user
+// 1. Should find contributions to Gsoc2 repo's for the user
 // 2. Should save tokens to continuously check this
 func HandleNewGithubRegister(resp http.ResponseWriter, request *http.Request) {
 	cors := HandleCors(resp, request)
@@ -399,12 +399,12 @@ func HandleNewGithubRegister(resp http.ResponseWriter, request *http.Request) {
 
 	//GET /repos/{owner}/{repo}/contributors
 	repositories := map[string]string{
-		"frikky/shuffle":           "core",
-		"frikky/shuffle-shared":    "core",
-		"shuffle/shuffle-docs":     "docs",
-		"shuffle/shuffle-apps":     "apps",
-		"shuffle/openapi-apps":     "apps",
-		"shuffle/shuffle-usecases": "workflows",
+		"frikky/gsoc2":           "core",
+		"frikky/gsoc2-shared":    "core",
+		"gsoc2/gsoc2-docs":     "docs",
+		"gsoc2/gsoc2-apps":     "apps",
+		"gsoc2/openapi-apps":     "apps",
+		"gsoc2/gsoc2-usecases": "workflows",
 	}
 
 	// Reset
@@ -1012,7 +1012,7 @@ func MakeGmailSubscription(ctx context.Context, client *http.Client, folderIds [
 		log.Printf("[WARNING] Failed to cancel gmail subscription before remaking it: %s", err)
 	}
 
-	resource := "projects/shuffler/topics/gmail_testing"
+	resource := "projects/soc2.khulnasoft.com/topics/gmail_testing"
 	//log.Printf("[INFO] Subscription resource to get for gmail: %s", resource)
 	sub := GmailSubscription{
 		TopicName: resource,
@@ -1124,7 +1124,7 @@ func MakeOutlookSubscription(client *http.Client, folderIds []string, notificati
 	log.Printf("[INFO] Subscription resource to get(s): %s with time %s", resource, timeFormat)
 	sub := OutlookSubscription{
 		ChangeType:         "created",
-		ClientState:        "Shuffle subscription",
+		ClientState:        "Gsoc2 subscription",
 		NotificationURL:    notificationURL,
 		ExpirationDateTime: timeFormat,
 		Resource:           resource,
@@ -1980,13 +1980,13 @@ func HandleCreateGmailSub(resp http.ResponseWriter, request *http.Request) {
 		// Set the ID somewhere here
 		trigger.SubscriptionId = sub.HistoryId
 
-		callbackUrl := "https://shuffler.io"
-		if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-			callbackUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+		callbackUrl := "https://soc2.khulnasoft.com.io"
+		if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+			callbackUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 		}
 
-		if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-			callbackUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+		if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+			callbackUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 		}
 
 		returnUrl := fmt.Sprintf("%s/api/v1/hooks/webhook_%s", callbackUrl, trigger.Id)
@@ -2465,7 +2465,7 @@ func GetGmailHistory(ctx context.Context, gmailClient *http.Client, userId, hist
 func handleIndividualEmailUploads(ctx context.Context, gmailClient *http.Client, trigger *TriggerAuth, mail GmailMessageStruct, findHistory ParsedMessage, message MessageAddedMessage) (MessageAddedMessage, error) {
 
 	timeNow := time.Now().Unix()
-	var basepath = os.Getenv("SHUFFLE_FILE_LOCATION")
+	var basepath = os.Getenv("GSOC2_FILE_LOCATION")
 	if len(basepath) == 0 {
 		basepath = "files"
 	}
@@ -2543,13 +2543,13 @@ func handleIndividualEmailUploads(ctx context.Context, gmailClient *http.Client,
 		return message, err
 	}
 
-	callbackUrl := "https://shuffler.io"
-	if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-		callbackUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+	callbackUrl := "https://soc2.khulnasoft.com.io"
+	if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+		callbackUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 	}
 
-	if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-		callbackUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+		callbackUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 	}
 
 	webhookUrl := fmt.Sprintf("%s/api/v1/hooks/webhook_%s", callbackUrl, trigger.Id)
@@ -2790,13 +2790,13 @@ func HandleGmailRouting(resp http.ResponseWriter, request *http.Request) {
 		}
 
 		if len(item.Messages) <= 3 {
-			callbackUrl := "https://shuffler.io"
-			if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-				callbackUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+			callbackUrl := "https://soc2.khulnasoft.com.io"
+			if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+				callbackUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 			}
 
-			if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-				callbackUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+			if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+				callbackUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 			}
 
 			for _, message := range item.Messages {
@@ -2818,7 +2818,7 @@ func HandleGmailRouting(resp http.ResponseWriter, request *http.Request) {
 
 				timeNow := time.Now().Unix()
 
-				var basepath = os.Getenv("SHUFFLE_FILE_LOCATION")
+				var basepath = os.Getenv("GSOC2_FILE_LOCATION")
 				if len(basepath) == 0 {
 					basepath = "files"
 				}
@@ -3447,13 +3447,13 @@ func HandleGetOutlookFolders(resp http.ResponseWriter, request *http.Request) {
 	//	return
 	//}
 
-	callbackUrl := "https://shuffler.io"
-	if len(os.Getenv("SHUFFLE_GCEPROJECT")) > 0 && len(os.Getenv("SHUFFLE_GCEPROJECT_LOCATION")) > 0 {
-		callbackUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("SHUFFLE_GCEPROJECT"), os.Getenv("SHUFFLE_GCEPROJECT_LOCATION"))
+	callbackUrl := "https://soc2.khulnasoft.com.io"
+	if len(os.Getenv("GSOC2_GCEPROJECT")) > 0 && len(os.Getenv("GSOC2_GCEPROJECT_LOCATION")) > 0 {
+		callbackUrl = fmt.Sprintf("https://%s.%s.r.appspot.com", os.Getenv("GSOC2_GCEPROJECT"), os.Getenv("GSOC2_GCEPROJECT_LOCATION"))
 	}
 
-	if len(os.Getenv("SHUFFLE_CLOUDRUN_URL")) > 0 {
-		callbackUrl = os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	if len(os.Getenv("GSOC2_CLOUDRUN_URL")) > 0 {
+		callbackUrl = os.Getenv("GSOC2_CLOUDRUN_URL")
 	}
 
 	url := fmt.Sprintf("%s/api/v1/triggers/gmail/register", callbackUrl)

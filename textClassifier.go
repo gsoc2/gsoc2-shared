@@ -1,4 +1,4 @@
-package shuffle
+package gsoc2
 
 // Basic classifier that tries to look for similarities without requiring a lot of resources.
 // FIXME: Not doing loops at all yet.

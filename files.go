@@ -1,7 +1,7 @@
-package shuffle
+package gsoc2
 
 /*
-	Handles files within Workflows.of Shuffle
+	Handles files within Workflows.of Gsoc2
 */
 
 import (
@@ -27,12 +27,12 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var basepath = os.Getenv("SHUFFLE_FILE_LOCATION")
-var orgFileBucket = "shuffle_org_files"
+var basepath = os.Getenv("GSOC2_FILE_LOCATION")
+var orgFileBucket = "gsoc2_org_files"
 
 func init() {
-	if len(os.Getenv("SHUFFLE_ORG_BUCKET")) > 0 {
-		orgFileBucket = os.Getenv("SHUFFLE_ORG_BUCKET")
+	if len(os.Getenv("GSOC2_ORG_BUCKET")) > 0 {
+		orgFileBucket = os.Getenv("GSOC2_ORG_BUCKET")
 	} else {
 		// Using standard bucket
 	}
@@ -970,7 +970,7 @@ func HandleEditFile(resp http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Printf("[ERROR] Failed to upload file with ID %s: %s", fileId, err)
 		resp.WriteHeader(500)
-		resp.Write([]byte(`{"success": false, "reason": "Failed file upload in Shuffle"}`))
+		resp.Write([]byte(`{"success": false, "reason": "Failed file upload in Gsoc2"}`))
 		return
 	}
 
@@ -1068,11 +1068,11 @@ func HandleUploadFile(resp http.ResponseWriter, request *http.Request) {
 
 	// Read the file from the upload request
 	request.ParseMultipartForm(32 << 20)
-	parsedFile, _, err := request.FormFile("shuffle_file")
+	parsedFile, _, err := request.FormFile("gsoc2_file")
 	if err != nil {
 		log.Printf("[ERROR] Couldn't upload file: %s", err)
 		resp.WriteHeader(401)
-		resp.Write([]byte(`{"success": false, "reason": "Failed uploading file. Correct usage is: shuffle_file=@filepath"}`))
+		resp.Write([]byte(`{"success": false, "reason": "Failed uploading file. Correct usage is: gsoc2_file=@filepath"}`))
 		return
 	}
 
@@ -1106,7 +1106,7 @@ func HandleUploadFile(resp http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Printf("[ERROR] Failed to upload file %s: %s", fileId, err)
 		resp.WriteHeader(500)
-		resp.Write([]byte(`{"success": false, "reason": "Failed file upload in Shuffle"}`))
+		resp.Write([]byte(`{"success": false, "reason": "Failed file upload in Gsoc2"}`))
 		return
 	}
 
@@ -1366,7 +1366,7 @@ func HandleCreateFile(resp http.ResponseWriter, request *http.Request) {
 	duplicateWorkflows := []string{}
 	if curfile.WorkflowId != "global" {
 		for _, trigger := range workflow.Triggers {
-			if trigger.AppName == "Shuffle Workflow" && trigger.TriggerType == "SUBFLOW" {
+			if trigger.AppName == "Gsoc2 Workflow" && trigger.TriggerType == "SUBFLOW" {
 				for _, parameter := range trigger.Parameters {
 					if parameter.Name == "workflow" && len(parameter.Value) > 0 {
 

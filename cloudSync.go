@@ -1,4 +1,4 @@
-package shuffle
+package gsoc2
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ func executeCloudAction(action CloudSyncJob, apikey string) error {
 	}
 
 	client := &http.Client{}
-	syncUrl := fmt.Sprintf("https://shuffler.io/api/v1/cloud/sync/handle_action")
+	syncUrl := fmt.Sprintf("https://soc2.khulnasoft.com.io/api/v1/cloud/sync/handle_action")
 	req, err := http.NewRequest(
 		"POST",
 		syncUrl,
@@ -57,7 +57,7 @@ func executeCloudAction(action CloudSyncJob, apikey string) error {
 	}
 
 	if !responseData.Success {
-		return errors.New(fmt.Sprintf("Cloud error from Shuffler: %s", responseData.Reason))
+		return errors.New(fmt.Sprintf("Cloud error from soc2.khulnasoft.com: %s", responseData.Reason))
 	}
 
 	return nil
@@ -604,7 +604,7 @@ func ValidateExecutionUsage(ctx context.Context, orgId string) (*Org, error) {
 
 		// FIXME: When inside this, check if usage should be sent to the user
 		if org.SyncFeatures.AppExecutions.Usage > org.SyncFeatures.AppExecutions.Limit {
-			return org, errors.New(fmt.Sprintf("You are above your limited usage of app executions this month (%d / %d) when running with triggers. Contact support@shuffler.io or the live chat to extend this.", org.SyncFeatures.AppExecutions.Usage, org.SyncFeatures.AppExecutions.Limit))
+			return org, errors.New(fmt.Sprintf("You are above your limited usage of app executions this month (%d / %d) when running with triggers. Contact support@soc2.khulnasoft.com.io or the live chat to extend this.", org.SyncFeatures.AppExecutions.Usage, org.SyncFeatures.AppExecutions.Limit))
 		}
 
 		return org, nil
@@ -645,7 +645,7 @@ func RunActionAI(resp http.ResponseWriter, request *http.Request) {
 	}
 
 	// For now, just redirecting
-	log.Printf("[DEBUG] Redirecting Action AI request to main site handler (shuffler.io)")
+	log.Printf("[DEBUG] Redirecting Action AI request to main site handler (soc2.khulnasoft.com.io)")
 
 	// Add api-key from the org sync
 	if org.SyncConfig.Apikey != "" {
@@ -663,14 +663,14 @@ func RunActionAI(resp http.ResponseWriter, request *http.Request) {
 
 func RedirectUserRequest(w http.ResponseWriter, req *http.Request) {
 	proxyScheme := "https"
-	proxyHost := fmt.Sprintf("shuffler.io")
+	proxyHost := fmt.Sprintf("soc2.khulnasoft.com.io")
 
 	httpClient := &http.Client{
 		Timeout: 120 * time.Second,
 	}
 
 	//fmt.Fprint(resp, "OK")
-	//http.Redirect(resp, request, "https://europe-west2-shuffler.cloudfunctions.net/ShuffleSSR", 303)
+	//http.Redirect(resp, request, "https://europe-west2-soc2.khulnasoft.com.cloudfunctions.net/Gsoc2SSR", 303)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Printf("[ERROR] Issue in SSR body proxy: %s", err)

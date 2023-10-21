@@ -1,4 +1,4 @@
-package shuffle
+package gsoc2
 
 import (
 	"bytes"
@@ -74,9 +74,9 @@ func RunOpsAppHealthCheck(apiKey string, orgId string) (AppHealth, error) {
 	}
 
 	// 1. Get App
-	baseURL := os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	baseURL := os.Getenv("GSOC2_CLOUDRUN_URL")
 	// if len(baseURL) == 0 {
-	baseURL = "https://shuffler.io"
+	baseURL = "https://soc2.khulnasoft.com.io"
 	// }
 
 	url := baseURL + "/api/v1/apps/edaa73d40238ee60874a853dc3ccaa6f/config"
@@ -395,15 +395,15 @@ func RunOpsHealthCheck(resp http.ResponseWriter, request *http.Request) {
 
 	ctx := GetContext(request)
 
-	if os.Getenv("SHUFFLE_HEALTHCHECK_DISABLED") == "true" {
+	if os.Getenv("GSOC2_HEALTHCHECK_DISABLED") == "true" {
 		resp.WriteHeader(200)
-		resp.Write([]byte(`{"success": false, "reason": "Healthcheck disabled (not default). Set SHUFFLE_HEALTHCHECK_DISABLED=false to re-enable it."}`))
+		resp.Write([]byte(`{"success": false, "reason": "Healthcheck disabled (not default). Set GSOC2_HEALTHCHECK_DISABLED=false to re-enable it."}`))
 		return
 	}
 
 	// Allows overwrites if they exist
-	apiKey := os.Getenv("SHUFFLE_OPS_DASHBOARD_APIKEY")
-	orgId := os.Getenv("SHUFFLE_OPS_DASHBOARD_ORG")
+	apiKey := os.Getenv("GSOC2_OPS_DASHBOARD_APIKEY")
+	orgId := os.Getenv("GSOC2_OPS_DASHBOARD_ORG")
 	if project.Environment == "onprem" && (len(apiKey) == 0 || len(orgId) == 0) {
 		log.Printf("[DEBUG] Ops dashboard api key or org not set. Getting first org and user")
 		org, err := GetFirstOrg(ctx)
@@ -423,7 +423,7 @@ func RunOpsHealthCheck(resp http.ResponseWriter, request *http.Request) {
 	if len(apiKey) == 0 || len(orgId) == 0 {
 		log.Printf("[WARNING] Ops dashboard api key or org not set. Not setting up ops workflow")
 		resp.WriteHeader(500)
-		resp.Write([]byte(`{"success": false, "reason": "SHUFFLE_OPS_DASHBOARD_APIKEY or SHUFFLE_OPS_DASHBOARD_ORG not set. Please set these to use this feature!"}`))
+		resp.Write([]byte(`{"success": false, "reason": "GSOC2_OPS_DASHBOARD_APIKEY or GSOC2_OPS_DASHBOARD_ORG not set. Please set these to use this feature!"}`))
 		return
 	}
 
@@ -514,14 +514,14 @@ func RunOpsHealthCheck(resp http.ResponseWriter, request *http.Request) {
 		resp.WriteHeader(401)
 		resp.Write([]byte(`{"success": false, "reason": "Only admins can run health check!"}`))
 		return
-	} else if project.Environment == "Cloud" && (userInfo.ApiKey != os.Getenv("SHUFFLE_OPS_DASHBOARD_APIKEY") || userInfo.SupportAccess) {
+	} else if project.Environment == "Cloud" && (userInfo.ApiKey != os.Getenv("GSOC2_OPS_DASHBOARD_APIKEY") || userInfo.SupportAccess) {
 		resp.WriteHeader(401)
 		resp.Write([]byte(`{"success": false, "reason": "Only admins can run health check!"}`))
 		return
 	}
 
 	//log.Printf("[DEBUG] Does user who is running health check have support access? %t", userInfo.SupportAccess)
-	//log.Printf("[DEBUG] Is user api key same as ops dashboard api key? %t", userInfo.ApiKey == os.Getenv("SHUFFLE_OPS_DASHBOARD_APIKEY"))
+	//log.Printf("[DEBUG] Is user api key same as ops dashboard api key? %t", userInfo.ApiKey == os.Getenv("GSOC2_OPS_DASHBOARD_APIKEY"))
 
 	// Use channel for getting RunOpsWorkflow function results
 	workflowHealthChannel := make(chan WorkflowHealth)
@@ -574,7 +574,7 @@ func RunOpsHealthCheck(resp http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Printf("[ERROR] Failed marshalling platform health data: %s", err)
 		resp.WriteHeader(500)
-		resp.Write([]byte(`{"success": false, "reason": "Failed JSON parsing platform health. Contact support@shuffler.io"}`))
+		resp.Write([]byte(`{"success": false, "reason": "Failed JSON parsing platform health. Contact support@soc2.khulnasoft.com.io"}`))
 		return
 	}
 
@@ -647,10 +647,10 @@ func GetOpsDashboardStats(resp http.ResponseWriter, request *http.Request) {
 }
 
 func deleteOpsWorkflow(workflowHealth WorkflowHealth, apiKey string) error {
-	baseUrl := os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	baseUrl := os.Getenv("GSOC2_CLOUDRUN_URL")
 	if len(baseUrl) == 0 {
 		log.Printf("[DEBUG] Base url not set. Setting to default: for delete")
-		baseUrl = "https://shuffler.io"
+		baseUrl = "https://soc2.khulnasoft.com.io"
 	}
 
 	if project.Environment == "onprem" {
@@ -729,19 +729,19 @@ func fixOpensearch() error {
 	  }`
 
 	// Get the username and password from environment variables
-	username := os.Getenv("SHUFFLE_OPENSEARCH_USERNAME")
+	username := os.Getenv("GSOC2_OPENSEARCH_USERNAME")
 	if len(username) == 0 {
 		log.Printf("[DEBUG] Opensearch username not set. Setting to default")
 		username = "admin"
 	}
 
-	password := os.Getenv("SHUFFLE_OPENSEARCH_PASSWORD")
+	password := os.Getenv("GSOC2_OPENSEARCH_PASSWORD")
 	if len(password) == 0 {
 		log.Printf("[DEBUG] Opensearch password not set. Setting to default")
 		password = "admin"
 	}
 
-	opensearchUrl := os.Getenv("SHUFFLE_OPENSEARCH_URL")
+	opensearchUrl := os.Getenv("GSOC2_OPENSEARCH_URL")
 	if len(opensearchUrl) == 0 {
 		log.Printf("[DEBUG] Opensearch url not set. Setting to default")
 		opensearchUrl = "http://localhost:9200"
@@ -804,10 +804,10 @@ func RunOpsWorkflow(apiKey string, orgId string) (WorkflowHealth, error) {
 		WorkflowId:  "",
 	}
 
-	baseUrl := os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	baseUrl := os.Getenv("GSOC2_CLOUDRUN_URL")
 	if len(baseUrl) == 0 {
 		log.Printf("[DEBUG] Base url not set. Setting to default")
-		baseUrl = "https://shuffler.io"
+		baseUrl = "https://soc2.khulnasoft.com.io"
 	}
 
 	if project.Environment == "onprem" {
@@ -931,7 +931,7 @@ func RunOpsWorkflow(apiKey string, orgId string) (WorkflowHealth, error) {
 		req.Header.Set("Authorization", "Bearer "+apiKey)
 
 		// convert the body to JSON
-		reqBody := map[string]string{"execution_id": execution.ExecutionId, "authorization": os.Getenv("SHUFFLE_OPS_DASHBOARD_APIKEY")}
+		reqBody := map[string]string{"execution_id": execution.ExecutionId, "authorization": os.Getenv("GSOC2_OPS_DASHBOARD_APIKEY")}
 		reqBodyJson, err := json.Marshal(reqBody)
 
 		// set the body
@@ -1037,7 +1037,7 @@ func InitOpsWorkflow(apiKey string, OrgId string) (string, error) {
 	client := &http.Client{}
 	body := GetWorkflowTest()
 	if project.Environment == "cloud" {
-		url := "https://shuffler.io/api/v1/workflows/602c7cf5-500e-4bd1-8a97-aa5bc8a554e6"
+		url := "https://soc2.khulnasoft.com.io/api/v1/workflows/602c7cf5-500e-4bd1-8a97-aa5bc8a554e6"
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			log.Println("[ERROR] creating HTTP request:", err)
@@ -1102,8 +1102,8 @@ func InitOpsWorkflow(apiKey string, OrgId string) (string, error) {
 		action := workflowData.Actions[actionIndex]
 
 		if project.Environment == "onprem" {
-			if action.Environment != "Shuffle" {
-				action.Environment = "Shuffle"
+			if action.Environment != "Gsoc2" {
+				action.Environment = "Gsoc2"
 			}
 		} else {
 			if action.Environment != "Cloud" {
@@ -1127,11 +1127,11 @@ func InitOpsWorkflow(apiKey string, OrgId string) (string, error) {
 	// }
 
 	// create an empty workflow
-	// make a POST request to https://shuffler.io/api/v1/workflows
-	baseUrl := os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	// make a POST request to https://soc2.khulnasoft.com.io/api/v1/workflows
+	baseUrl := os.Getenv("GSOC2_CLOUDRUN_URL")
 	if len(baseUrl) == 0 {
 		log.Printf("[DEBUG] Base url not set. Setting to default")
-		baseUrl = "https://shuffler.io"
+		baseUrl = "https://soc2.khulnasoft.com.io"
 	}
 
 	if project.Environment == "onprem" {

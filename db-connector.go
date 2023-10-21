@@ -1,4 +1,4 @@
-package shuffle
+package gsoc2
 
 import (
 	"bytes"
@@ -47,14 +47,14 @@ import (
 
 //var requestCache *cache.Cache
 var requestCache = cache.New(60*time.Minute, 60*time.Minute)
-var memcached = os.Getenv("SHUFFLE_MEMCACHED")
+var memcached = os.Getenv("GSOC2_MEMCACHED")
 var mc = gomemcache.New(memcached)
 
 var maxCacheSize = 1020000
 
 //var maxCacheSize = 2000000
 
-type ShuffleStorage struct {
+type Gsoc2Storage struct {
 	GceProject    string
 	Dbclient      datastore.Client
 	StorageClient storage.Client
@@ -68,10 +68,10 @@ type ShuffleStorage struct {
 
 // Create ElasticSearch/OpenSearch index prefix
 // It is used where a single cluster of ElasticSearch/OpenSearch utilized by several
-// Shuffle instance
+// Gsoc2 instance
 // E.g. Instance1_Workflowapp
 func GetESIndexPrefix(index string) string {
-	prefix := os.Getenv("SHUFFLE_OPENSEARCH_INDEX_PREFIX")
+	prefix := os.Getenv("GSOC2_OPENSEARCH_INDEX_PREFIX")
 	if len(prefix) > 0 {
 		return fmt.Sprintf("%s_%s", prefix, index)
 	}
@@ -620,7 +620,7 @@ func GetCache(ctx context.Context, name string) (interface{}, error) {
 			}
 		}
 
-		return "", errors.New(fmt.Sprintf("No cache found in SHUFFLE_MEMCACHED for %s", name))
+		return "", errors.New(fmt.Sprintf("No cache found in GSOC2_MEMCACHED for %s", name))
 	}
 
 	if false {
@@ -915,10 +915,10 @@ func SetWorkflowExecution(ctx context.Context, workflowExecution WorkflowExecuti
 	// Weird workaround that only applies during local development
 	hostname, err := os.Hostname()
 	if err != nil || hostname == "debian" {
-		hostname = "shuffle-backend"
+		hostname = "gsoc2-backend"
 	}
 
-	if (os.Getenv("SHUFFLE_SWARM_CONFIG") == "run" || project.Environment == "worker") && !strings.Contains(strings.ToLower(hostname), "backend") {
+	if (os.Getenv("GSOC2_SWARM_CONFIG") == "run" || project.Environment == "worker") && !strings.Contains(strings.ToLower(hostname), "backend") {
 		//log.Printf("[INFO] Not saving execution to DB, since we are running in swarm mode.")
 		return nil
 	}
@@ -1060,7 +1060,7 @@ func SetInitExecutionVariables(ctx context.Context, workflowExecution WorkflowEx
 
 		for _, trigger := range workflowExecution.Workflow.Triggers {
 			//log.Printf("Appname trigger (0): %s", trigger.AppName)
-			if trigger.AppName == "User Input" || trigger.AppName == "Shuffle Workflow" {
+			if trigger.AppName == "User Input" || trigger.AppName == "Gsoc2 Workflow" {
 				//log.Printf("%s is a special trigger. Checking where.", trigger.AppName)
 
 				found := false
@@ -1470,7 +1470,7 @@ func GetWorkflowExecution(ctx context.Context, id string) (*WorkflowExecution, e
 		}
 	}
 
-	if (os.Getenv("SHUFFLE_SWARM_CONFIG") == "run" || project.Environment == "worker") && project.Environment != "cloud" {
+	if (os.Getenv("GSOC2_SWARM_CONFIG") == "run" || project.Environment == "worker") && project.Environment != "cloud" {
 		return workflowExecution, nil
 	}
 
@@ -1574,7 +1574,7 @@ func getCloudFileApp(ctx context.Context, workflowApp WorkflowApp, id string) (W
 
 	fullParsedPath := fmt.Sprintf("extra_specs/%s/appspec.json", id)
 	//log.Printf("[DEBUG] Couldn't find working app for app with ID %s. Checking filepath gs://%s/%s (size too big)", id, project.BucketName, fullParsedPath)
-	//gs://shuffler.appspot.com/extra_specs/0373ed696a3a2cba0a2b6838068f2b80
+	//gs://soc2.khulnasoft.com.appspot.com/extra_specs/0373ed696a3a2cba0a2b6838068f2b80
 
 	cacheKey := fmt.Sprintf("cloud_file_app_%s", id)
 	if project.CacheDb {
@@ -3496,7 +3496,7 @@ func GetOpenApiDatastore(ctx context.Context, id string) (ParsedOpenApi, error) 
 
 			//project.BucketName := project.BucketName
 			fullParsedPath := fmt.Sprintf("extra_specs/%s/openapi.json", id)
-			//gs://shuffler.appspot.com/extra_specs/0373ed696a3a2cba0a2b6838068f2b80
+			//gs://soc2.khulnasoft.com.appspot.com/extra_specs/0373ed696a3a2cba0a2b6838068f2b80
 			//log.Printf("[DEBUG] Couldn't find openapi for %s. Checking filepath gs://%s/%s (size too big). Error: %s", id, project.BucketName, fullParsedPath, err)
 
 			client, err := storage.NewClient(ctx)
@@ -4285,7 +4285,7 @@ func GetEnvironments(ctx context.Context, orgId string) ([]Environment, error) {
 		defer res.Body.Close()
 		if res.StatusCode == 404 {
 			item := Environment{
-				Name:    "Shuffle",
+				Name:    "Gsoc2",
 				Type:    "onprem",
 				OrgId:   orgId,
 				Default: true,
@@ -4351,7 +4351,7 @@ func GetEnvironments(ctx context.Context, orgId string) ([]Environment, error) {
 
 	if len(environments) == 0 {
 		item := Environment{
-			Name:    "Shuffle",
+			Name:    "Gsoc2",
 			Type:    "onprem",
 			OrgId:   orgId,
 			Default: true,
@@ -4375,7 +4375,7 @@ func GetEnvironments(ctx context.Context, orgId string) ([]Environment, error) {
 	for envIndex, env := range environments {
 		if env.Name == "Cloud" {
 			environments[envIndex].Type = "cloud"
-		} else if env.Name == "Shuffle" {
+		} else if env.Name == "Gsoc2" {
 			environments[envIndex].Type = "onprem"
 		}
 	}
@@ -4534,7 +4534,7 @@ func GetPrioritizedApps(ctx context.Context, user User) ([]WorkflowApp, error) {
 					break
 				}
 
-				if innerApp.Name == "Shuffle Subflow" {
+				if innerApp.Name == "Gsoc2 Subflow" {
 					continue
 				}
 
@@ -4617,7 +4617,7 @@ func GetPrioritizedApps(ctx context.Context, user User) ([]WorkflowApp, error) {
 					}
 				}
 
-				if innerApp.Name == "Shuffle Subflow" {
+				if innerApp.Name == "Gsoc2 Subflow" {
 					continue
 				}
 
@@ -4847,10 +4847,10 @@ func fixAppAppend(allApps []WorkflowApp, innerApp WorkflowApp) ([]WorkflowApp, W
 	found := false
 
 	for appIndex, loopedApp := range allApps {
-		// Check if shuffle subflow and skip
+		// Check if gsoc2 subflow and skip
 
 
-		if strings.ToLower(loopedApp.Name) == "shuffle tools" {
+		if strings.ToLower(loopedApp.Name) == "gsoc2 tools" {
 			//log.Printf("%s vs %s - %s vs %s", loopedApp.Name, innerApp.Name, loopedApp.AppVersion, innerApp.AppVersion)
 		}
 
@@ -5029,7 +5029,7 @@ func GetAllWorkflowApps(ctx context.Context, maxLen int, depth int) ([]WorkflowA
 		duplicates := map[string][]string{}
 		for _, hit := range wrapped.Hits.Hits {
 			innerApp := hit.Source
-			//if strings.Contains(strings.ToLower(innerApp.Name), "shuffle") {
+			//if strings.Contains(strings.ToLower(innerApp.Name), "gsoc2") {
 			//	log.Printf("APP: %s", innerApp.Name)
 			//}
 
@@ -5041,7 +5041,7 @@ func GetAllWorkflowApps(ctx context.Context, maxLen int, depth int) ([]WorkflowA
 				//duplicates[innerApp.Name] = append(duplicates[innerApp.Name], innerApp.ID)
 			}
 
-			if innerApp.Name == "Shuffle Subflow" {
+			if innerApp.Name == "Gsoc2 Subflow" {
 				continue
 			}
 
@@ -5100,7 +5100,7 @@ func GetAllWorkflowApps(ctx context.Context, maxLen int, depth int) ([]WorkflowA
 					break
 				}
 
-				if innerApp.Name == "Shuffle Subflow" {
+				if innerApp.Name == "Gsoc2 Subflow" {
 					continue
 				}
 
@@ -8720,17 +8720,17 @@ func GetCacheKey(ctx context.Context, id string) (*CacheKeyData, error) {
 }
 
 var retryCount int
-func RunInit(dbclient datastore.Client, storageClient storage.Client, gceProject, environment string, cacheDb bool, dbType string) (ShuffleStorage, error) {
+func RunInit(dbclient datastore.Client, storageClient storage.Client, gceProject, environment string, cacheDb bool, dbType string) (Gsoc2Storage, error) {
 	if dbType == "elasticsearch" {
 		dbType = "opensearch"
 	}
 
-	cloudRunUrl := os.Getenv("SHUFFLE_CLOUDRUN_URL")
+	cloudRunUrl := os.Getenv("GSOC2_CLOUDRUN_URL")
 	if cloudRunUrl == "" {
-		cloudRunUrl = "https://shuffler.io"
+		cloudRunUrl = "https://soc2.khulnasoft.com.io"
 	}
 
-	project = ShuffleStorage{
+	project = Gsoc2Storage{
 		Dbclient:      dbclient,
 		StorageClient: storageClient,
 		GceProject:    gceProject,
@@ -8738,17 +8738,17 @@ func RunInit(dbclient datastore.Client, storageClient storage.Client, gceProject
 		CacheDb:       cacheDb,
 		DbType:        dbType,
 		CloudUrl:      cloudRunUrl,
-		BucketName:    "shuffler.appspot.com",
+		BucketName:    "soc2.khulnasoft.com.appspot.com",
 	}
 
-	bucketName := os.Getenv("SHUFFLE_ORG_BUCKET")
+	bucketName := os.Getenv("GSOC2_ORG_BUCKET")
 	if len(bucketName) > 0 {
 		log.Printf("[DEBUG] Using custom project bucketname: %s", bucketName)
 		project.BucketName = bucketName
 	}
 
 	// docker run -p 11211:11211 --name memcache -d memcached -m 100
-	log.Printf("[DEBUG] Starting with memcached address '%s' (SHUFFLE_MEMCACHED). If this is empty, fallback to default (appengine / local)", memcached)
+	log.Printf("[DEBUG] Starting with memcached address '%s' (GSOC2_MEMCACHED). If this is empty, fallback to default (appengine / local)", memcached)
 
 	// In case of downtime / large requests
 	if len(memcached) > 0 {
@@ -8764,15 +8764,15 @@ func RunInit(dbclient datastore.Client, storageClient storage.Client, gceProject
 			log.Printf("[WARNING] Failed setting up Opensearch: %s. Typically means the backend can't connect, or that there's a HTTPS vs HTTP problem", err)
 			if strings.Contains(fmt.Sprintf("%s", err), "x509: certificate signed by unknown authority") || strings.Contains(fmt.Sprintf("%s", err), "EOF") {
 				if retryCount == 0 {
-					esUrl := os.Getenv("SHUFFLE_OPENSEARCH_URL")
+					esUrl := os.Getenv("GSOC2_OPENSEARCH_URL")
 					if strings.Contains(esUrl, "http://") {
 						esUrl = strings.Replace(esUrl, "http://", "https://", 1)
 					}
 
-					os.Setenv("SHUFFLE_OPENSEARCH_URL", esUrl)
+					os.Setenv("GSOC2_OPENSEARCH_URL", esUrl)
 
 					log.Printf("[ERROR] Automatically skipping SSL verification for Opensearch connection and swapping http/https.") 
-					os.Setenv("SHUFFLE_OPENSEARCH_SKIPSSL_VERIFY", "true")
+					os.Setenv("GSOC2_OPENSEARCH_SKIPSSL_VERIFY", "true")
 
 					retryCount += 1
 					return RunInit(dbclient, storageClient, gceProject, environment, cacheDb, dbType) 
@@ -8817,17 +8817,17 @@ func RunInit(dbclient datastore.Client, storageClient storage.Client, gceProject
 }
 
 func GetEsConfig() *opensearch.Client {
-	esUrl := os.Getenv("SHUFFLE_OPENSEARCH_URL")
+	esUrl := os.Getenv("GSOC2_OPENSEARCH_URL")
 	if len(esUrl) == 0 {
-		esUrl = "https://shuffle-opensearch:9200"
+		esUrl = "https://gsoc2-opensearch:9200"
 	}
 
-	username := os.Getenv("SHUFFLE_OPENSEARCH_USERNAME")
+	username := os.Getenv("GSOC2_OPENSEARCH_USERNAME")
 	if len(username) == 0 {
 		username = "admin"
 	}
 
-	password := os.Getenv("SHUFFLE_OPENSEARCH_PASSWORD")
+	password := os.Getenv("GSOC2_OPENSEARCH_PASSWORD")
 	if len(password) == 0 {
 		password = "admin"
 	}
@@ -8842,8 +8842,8 @@ func GetEsConfig() *opensearch.Client {
 		MaxRetries:    5,
 		RetryOnStatus: []int{500, 502, 503, 504, 429, 403},
 	}
-	//APIKey:        os.Getenv("SHUFFLE_OPENSEARCH_APIKEY"),
-	//CloudID:       os.Getenv("SHUFFLE_OPENSEARCH_CLOUDID"),
+	//APIKey:        os.Getenv("GSOC2_OPENSEARCH_APIKEY"),
+	//CloudID:       os.Getenv("GSOC2_OPENSEARCH_CLOUDID"),
 
 	//config.Transport.TLSClientConfig
 	//transport := http.DefaultTransport.(*http.Transport).Clone()
@@ -8852,8 +8852,8 @@ func GetEsConfig() *opensearch.Client {
 	transport.ResponseHeaderTimeout = time.Second * 10
 	transport.Proxy = nil
 
-	if len(os.Getenv("SHUFFLE_OPENSEARCH_PROXY")) > 0 {
-		httpProxy := os.Getenv("SHUFFLE_OPENSEARCH_PROXY")
+	if len(os.Getenv("GSOC2_OPENSEARCH_PROXY")) > 0 {
+		httpProxy := os.Getenv("GSOC2_OPENSEARCH_PROXY")
 
 		url_i := url.URL{}
 		url_proxy, err := url_i.Parse(httpProxy)
@@ -8866,7 +8866,7 @@ func GetEsConfig() *opensearch.Client {
 	}
 
 	skipSSLVerify := false
-	if strings.ToLower(os.Getenv("SHUFFLE_OPENSEARCH_SKIPSSL_VERIFY")) == "true" {
+	if strings.ToLower(os.Getenv("GSOC2_OPENSEARCH_SKIPSSL_VERIFY")) == "true" {
 		log.Printf("[DEBUG] SKIPPING SSL verification with Opensearch")
 		skipSSLVerify = true
 	}
@@ -8877,7 +8877,7 @@ func GetEsConfig() *opensearch.Client {
 	}
 
 	//https://github.com/elastic/go-opensearch/blob/master/_examples/security/opensearch-cluster.yml
-	certificateLocation := os.Getenv("SHUFFLE_OPENSEARCH_CERTIFICATE_FILE")
+	certificateLocation := os.Getenv("GSOC2_OPENSEARCH_CERTIFICATE_FILE")
 	if len(certificateLocation) > 0 {
 		cert, err := ioutil.ReadFile(certificateLocation)
 		if err != nil {
@@ -9678,7 +9678,7 @@ func RunCacheCleanup(ctx context.Context, workflowExecution WorkflowExecution) {
 	}
 
 	// As worker will be killed off anyway otherwise
-	if os.Getenv("SHUFFLE_SWARM_CONFIG") != "run" {
+	if os.Getenv("GSOC2_SWARM_CONFIG") != "run" {
 		return
 	}
 
@@ -9718,7 +9718,7 @@ func ValidateFinished(ctx context.Context, extra int, workflowExecution Workflow
 				invalidResults += 1
 			}
 
-			if result.Action.AppName == "User Input" || result.Action.AppName == "Shuffle Workflow" {
+			if result.Action.AppName == "User Input" || result.Action.AppName == "Gsoc2 Workflow" {
 				subflows += 1
 			}
 		}
@@ -9970,7 +9970,7 @@ func GetNodeRelations(ctx context.Context) (map[string]NodeRelation, error) {
 	// Download a file
 	allNodesRelations := make(map[string]NodeRelation)
 
-	url := "https://storage.googleapis.com/shuffle_public/machine_learning/node_recs_2.json"
+	url := "https://storage.googleapis.com/gsoc2_public/machine_learning/node_recs_2.json"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("\n\n[WARNING] Failed getting node relations: %s\n\n", err)
